@@ -136,30 +136,43 @@ nav.scrolled {
 .hero {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 300px;
   align-items: center;
   padding: 140px 60px 80px;
   position: relative; overflow: hidden;
-  gap: 40px;
+  gap: 60px;
 }
+.hero-bg-before, .hero-bg-after, .scroll-hint {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  pointer-events: none;
+}
+.hero-bg-before, .hero-bg-after { align-self: stretch; }
 .hero-content {
   display: flex; flex-direction: column;
   justify-content: center;
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 1;
 }
-/* ambient lights */
-.hero::before {
-  content: '';
+.hero-stats {
+  grid-column: 2;
+  grid-row: 1;
+  z-index: 1;
+}
+/* ambient lights — must be position:absolute children, not grid items */
+.hero-bg-before {
   position: absolute; top: -20%; left: -5%;
   width: 55%; height: 70%;
   background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 65%);
-  pointer-events: none;
+  pointer-events: none; z-index: 0;
 }
-.hero::after {
-  content: '';
+.hero-bg-after {
   position: absolute; bottom: 0; right: -10%;
   width: 50%; height: 60%;
   background: radial-gradient(ellipse, rgba(59,107,255,0.06) 0%, transparent 65%);
-  pointer-events: none;
+  pointer-events: none; z-index: 0;
 }
 
 .hero-eyebrow {
@@ -280,6 +293,7 @@ nav.scrolled {
   font-family: var(--font-mono); font-size: 0.65rem;
   color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase;
   opacity: 0; animation: fadeIn 1s 1.4s ease forwards;
+  z-index: 2;
 }
 .scroll-line {
   width: 1px; height: 40px;
@@ -776,6 +790,9 @@ footer {
 
 <!-- HERO -->
 <section class="hero">
+  <div class="hero-bg-before"></div>
+  <div class="hero-bg-after"></div>
+
   <div class="hero-content">
     <div class="hero-eyebrow">LinkedIn Content Operating System</div>
 
@@ -804,14 +821,9 @@ footer {
       <div class="waveform-label">Your voice · AI-amplified</div>
       <div class="waveform" id="waveform"></div>
     </div>
-
-    <div class="scroll-hint">
-      <div class="scroll-line"></div>
-      Scroll to explore
-    </div>
   </div>
 
-  <!-- Floating stats -->
+  <!-- Stats panel — second grid column -->
   <div class="hero-stats">
     <div class="hero-stat">
       <div class="hero-stat-num">9<span>+</span></div>
@@ -827,6 +839,11 @@ footer {
       <div class="hero-stat-num">∞</div>
       <div class="hero-stat-label">Posts Archived</div>
     </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll to explore
   </div>
 </section>
 
