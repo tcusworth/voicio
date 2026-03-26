@@ -161,19 +161,20 @@ nav.scrolled {
   grid-row: 1;
   z-index: 1;
 }
-/* ambient lights — must be position:absolute children, not grid items */
-.hero-bg-before {
-  position: absolute; top: -20%; left: -5%;
-  width: 55%; height: 70%;
-  background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 65%);
-  pointer-events: none; z-index: 0;
+/* ambient lights as pseudo-elements — cannot be flex items */
+.hero::before {
+  content:'';
+  position:absolute;top:-20%;left:-5%;width:55%;height:70%;
+  background:radial-gradient(ellipse,rgba(201,168,76,0.07) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
 }
-.hero-bg-after {
-  position: absolute; bottom: 0; right: -10%;
-  width: 50%; height: 60%;
-  background: radial-gradient(ellipse, rgba(59,107,255,0.06) 0%, transparent 65%);
-  pointer-events: none; z-index: 0;
+.hero::after {
+  content:'';
+  position:absolute;bottom:0;right:-10%;width:50%;height:60%;
+  background:radial-gradient(ellipse,rgba(59,107,255,0.06) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
 }
+/* ambient lights as pseudo-elements — cannot be flex items */
 
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
@@ -789,11 +790,7 @@ footer {
 </nav>
 
 <!-- HERO -->
-<section class="hero" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:100vh;padding:140px 60px 80px;position:relative;overflow:hidden;gap:60px">
-
-  <!-- ambient bg -->
-  <div style="position:absolute;top:-20%;left:-5%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(201,168,76,0.07) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
-  <div style="position:absolute;bottom:0;right:-10%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(59,107,255,0.06) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
+<section class="hero" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:100vh;padding:140px 60px 80px;position:relative;overflow:hidden;gap:60px;box-sizing:border-box">
 
   <!-- LEFT: content -->
   <div style="flex:1;max-width:700px;position:relative;z-index:1">
