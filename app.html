@@ -1321,7 +1321,7 @@ async function generatePost(){
   const format=currentPostType==='carousel'?`a carousel outline with ${document.getElementById('slide-count').value} slides (numbered, each with title + 2-3 points)`:'a single LinkedIn post (150-300 words)';
   const prompt=`You are a ${toneMap[currentTone]}. Write ${format} about: "${topic}"${industryCtx}.\n\nRules:\n- Scroll-stopping first line\n- Short paragraphs (1-2 sentences)\n- Specific insight, story, or data point\n- End with CTA or question\n- Max 3-4 emojis\n- No hashtags\n\nWrite ONLY the post.`;
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     const text=d.content?.[0]?.text||'Error generating post.';
     lastGeneratedPost=text;
@@ -1392,7 +1392,7 @@ async function analyzeVoice(){
   const output=document.getElementById('voice-analysis');
   output.innerHTML='<div class="loading-row"><span class="spinner"></span> Analyzing voice patterns...</div>';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:`Analyze these LinkedIn posts and create a voice profile. Identify: sentence length patterns, vocabulary level, structural patterns, emotional tone, unique quirks.\n\nPosts:\n${samples.map((s,i)=>`Post ${i+1}:\n${s}`).join('\n\n')}\n\nBrief voice profile (max 200 words).`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:600,messages:[{role:'user',content:`Analyze these LinkedIn posts and create a voice profile. Identify: sentence length patterns, vocabulary level, structural patterns, emotional tone, unique quirks.\n\nPosts:\n${samples.map((s,i)=>`Post ${i+1}:\n${s}`).join('\n\n')}\n\nBrief voice profile (max 200 words).`}]})});
     const d=await r.json();output.textContent=d.content?.[0]?.text||'Analysis failed.';
   }catch(e){output.textContent='Error analyzing voice.';}
 }
@@ -1405,7 +1405,7 @@ async function generateInVoice(){
   const output=document.getElementById('voice-output');
   output.innerHTML='<div class="loading-row"><span class="spinner"></span> Writing in your voice...</div>';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:`Study these posts and replicate the author's exact voice:\n\n${samples.map((s,i)=>`Reference ${i+1}:\n${s}`).join('\n\n')}\n\nWrite a new LinkedIn post about: "${topic}"\n\nMatch sentence length, vocabulary, structure precisely. Write ONLY the post.`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:800,messages:[{role:'user',content:`Study these posts and replicate the author's exact voice:\n\n${samples.map((s,i)=>`Reference ${i+1}:\n${s}`).join('\n\n')}\n\nWrite a new LinkedIn post about: "${topic}"\n\nMatch sentence length, vocabulary, structure precisely. Write ONLY the post.`}]})});
     const d=await r.json();output.textContent=d.content?.[0]?.text||'Generation failed.';
   }catch(e){output.textContent='Error generating post.';}
 }
@@ -1421,7 +1421,7 @@ async function repurposeContent(){
   document.getElementById('repurpose-actions').style.display='none';
   const formatMap={post:'a single LinkedIn post (150-250 words)','3posts':'3 separate LinkedIn posts (label POST 1, POST 2, POST 3)',carousel:'a 6-slide carousel outline (each: Title + 3 bullets)',thread:'a 5-post LinkedIn thread (label 1/, 2/, 3/, 4/, 5/)'};
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:`Transform this ${sourceType} into ${formatMap[format]} optimized for LinkedIn.\n\nContent:\n${content.substring(0,3000)}\n\nRules: strong hook, short paragraphs, practical insights, end with CTA.\nWrite ONLY the output.`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:1500,messages:[{role:'user',content:`Transform this ${sourceType} into ${formatMap[format]} optimized for LinkedIn.\n\nContent:\n${content.substring(0,3000)}\n\nRules: strong hook, short paragraphs, practical insights, end with CTA.\nWrite ONLY the output.`}]})});
     const d=await r.json();output.textContent=d.content?.[0]?.text||'Failed.';
     document.getElementById('repurpose-actions').style.display='flex';
   }catch(e){output.textContent='Error repurposing content.';}
@@ -1444,7 +1444,7 @@ async function performAudit(post){
   document.getElementById('audit-results').style.display='none';
   document.getElementById('audit-placeholder').innerHTML='<div class="loading-row" style="justify-content:center;padding:40px"><span class="spinner"></span> Running audit...</div>';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Audit this LinkedIn post. Respond ONLY in JSON:\n{"score":75,"grade":"B+","summary":"Good engagement potential","checks":[{"label":"Hook Strength","status":"ok","note":"Strong opening"},{"label":"Readability","status":"ok","note":"Good paragraph breaks"},{"label":"Call to Action","status":"warn","note":"CTA could be stronger"},{"label":"Personal Story","status":"fail","note":"Missing personal experience"},{"label":"Specificity","status":"ok","note":"Good concrete details"},{"label":"Comment Bait","status":"warn","note":"Add a question"},{"label":"Length","status":"ok","note":"Good length"},{"label":"Emotional Pull","status":"ok","note":"Resonant"}]}\n\nPost:\n${post.substring(0,1500)}`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:1000,messages:[{role:'user',content:`Audit this LinkedIn post. Respond ONLY in JSON:\n{"score":75,"grade":"B+","summary":"Good engagement potential","checks":[{"label":"Hook Strength","status":"ok","note":"Strong opening"},{"label":"Readability","status":"ok","note":"Good paragraph breaks"},{"label":"Call to Action","status":"warn","note":"CTA could be stronger"},{"label":"Personal Story","status":"fail","note":"Missing personal experience"},{"label":"Specificity","status":"ok","note":"Good concrete details"},{"label":"Comment Bait","status":"warn","note":"Add a question"},{"label":"Length","status":"ok","note":"Good length"},{"label":"Emotional Pull","status":"ok","note":"Resonant"}]}\n\nPost:\n${post.substring(0,1500)}`}]})});
     const d=await r.json();
     let text=d.content?.[0]?.text||'{}';
     text=text.replace(/```json|```/g,'').trim();
@@ -1473,20 +1473,20 @@ async function generateFirstComment(){
   const post=document.getElementById('comment-input').value.trim();
   if(!post){showToast('Paste your post first','warn');return;}
   const output=document.getElementById('comment-output');output.style.display='block';output.innerHTML='<span class="spinner"></span>';
-  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:`Write a high-value first comment for this LinkedIn post: adds value not in the post, includes a tip or resource, boosts reach, encourages replies. Max 80 words.\n\nPost:\n${post}`}]})});const d=await r.json();output.textContent=d.content?.[0]?.text||'Error';}catch(e){output.textContent='Error.';}
+  try{const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:300,messages:[{role:'user',content:`Write a high-value first comment for this LinkedIn post: adds value not in the post, includes a tip or resource, boosts reach, encourages replies. Max 80 words.\n\nPost:\n${post}`}]})});const d=await r.json();output.textContent=d.content?.[0]?.text||'Error';}catch(e){output.textContent='Error.';}
 }
 async function generateVideoScript(){
   const post=document.getElementById('script-input').value.trim();
   if(!post){showToast('Paste your post first','warn');return;}
   const output=document.getElementById('script-output');output.style.display='block';output.innerHTML='<span class="spinner"></span>';
-  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:`Convert this post into a 60-second video script. Format: [0-5s HOOK], [5-45s CONTENT], [45-60s CTA]. Spoken words only, add [PAUSE] and [EMPHASIS] cues.\n\nPost:\n${post}`}]})});const d=await r.json();output.textContent=d.content?.[0]?.text||'Error';}catch(e){output.textContent='Error.';}
+  try{const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:600,messages:[{role:'user',content:`Convert this post into a 60-second video script. Format: [0-5s HOOK], [5-45s CONTENT], [45-60s CTA]. Spoken words only, add [PAUSE] and [EMPHASIS] cues.\n\nPost:\n${post}`}]})});const d=await r.json();output.textContent=d.content?.[0]?.text||'Error';}catch(e){output.textContent='Error.';}
 }
 async function generateSmartReplies(){
   const comment=document.getElementById('reply-input').value.trim();
   if(!comment){showToast('Enter a comment first','warn');return;}
   const output=document.getElementById('replies-output');output.style.display='block';output.innerHTML='<div class="loading-row"><span class="spinner"></span></div>';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:`Generate 3 varied LinkedIn replies to: "${comment}"\n\nStyles: 1) Appreciative + expand, 2) Follow-up question, 3) Counter-perspective\nLabel REPLY 1:, REPLY 2:, REPLY 3:. Max 50 words each. Sound human.`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:500,messages:[{role:'user',content:`Generate 3 varied LinkedIn replies to: "${comment}"\n\nStyles: 1) Appreciative + expand, 2) Follow-up question, 3) Counter-perspective\nLabel REPLY 1:, REPLY 2:, REPLY 3:. Max 50 words each. Sound human.`}]})});
     const d=await r.json();
     const text=d.content?.[0]?.text||'';
     const replies=text.split(/REPLY \d+:/i).filter(Boolean);
@@ -1497,7 +1497,7 @@ async function generateImagePrompt(){
   const topic=document.getElementById('image-input').value.trim();
   if(!topic){showToast('Enter topic first','warn');return;}
   const output=document.getElementById('image-output');output.style.display='block';output.innerHTML='<span class="spinner"></span>';
-  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:`Create a Midjourney/DALL-E prompt for a LinkedIn post about: "${topic}". Professional, abstract, LinkedIn-appropriate. Include style, mood, colors, composition. Max 100 words.`}]})});const d=await r.json();output.textContent=d.content?.[0]?.text||'Error';}catch(e){output.textContent='Error.';}
+  try{const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:300,messages:[{role:'user',content:`Create a Midjourney/DALL-E prompt for a LinkedIn post about: "${topic}". Professional, abstract, LinkedIn-appropriate. Include style, mood, colors, composition. Max 100 words.`}]})});const d=await r.json();output.textContent=d.content?.[0]?.text||'Error';}catch(e){output.textContent='Error.';}
 }
 
 // ========== HOOK LIBRARY ==========
@@ -1542,7 +1542,7 @@ async function generateHooks(){
   const type=document.getElementById('hook-gen-type').value;
   const output=document.getElementById('hook-gen-output');output.style.display='flex';output.innerHTML='<div class="loading-row"><span class="spinner"></span> Generating hooks...</div>';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:`Generate 5 LinkedIn hook lines for: "${topic}". Style: ${type}.\nRules: 1-2 sentences max, scroll-stopping, no hashtags or emojis.\nLabel HOOK 1:, HOOK 2:, etc. After each add TYPE: [question/stat/contrarian/story/list/confession]\nWrite ONLY the hooks.`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:700,messages:[{role:'user',content:`Generate 5 LinkedIn hook lines for: "${topic}". Style: ${type}.\nRules: 1-2 sentences max, scroll-stopping, no hashtags or emojis.\nLabel HOOK 1:, HOOK 2:, etc. After each add TYPE: [question/stat/contrarian/story/list/confession]\nWrite ONLY the hooks.`}]})});
     const d=await r.json();const text=d.content?.[0]?.text||'';
     const hookPairs=[];let current=null;
     text.split('\n').forEach(line=>{
@@ -1574,7 +1574,7 @@ async function generateSeries(){
   const arcMap={'problem-solution':'Problem → Agitate → Solution → Results → CTA','beginner-advanced':'progressive beginner to advanced','myth-reality':'myth-busting: myths → reality → action','story':'story arc: Setup → Conflict → Resolution → Lesson','framework':'framework: overview then one post per component'};
   const toneMap={'thought-leader':'authoritative thought leader','storyteller':'narrative storyteller','technical':'technical expert with data'};
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:`You are a ${toneMap[tone]}. Create a ${count}-post LinkedIn series about: "${topic}".\nUse ${arcMap[arc]} arc.\n\nFor each post:\nPOST [N]:\nTITLE: [title]\nBODY:\n[full post, 150-200 words, LinkedIn optimized]\nBRIDGE: [one-line tease for next post]\n\nMake each standalone but rewarding as a series.`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:2000,messages:[{role:'user',content:`You are a ${toneMap[tone]}. Create a ${count}-post LinkedIn series about: "${topic}".\nUse ${arcMap[arc]} arc.\n\nFor each post:\nPOST [N]:\nTITLE: [title]\nBODY:\n[full post, 150-200 words, LinkedIn optimized]\nBRIDGE: [one-line tease for next post]\n\nMake each standalone but rewarding as a series.`}]})});
     const d=await r.json();const text=d.content?.[0]?.text||'';
     const posts=text.split(/POST \d+:/i).filter(Boolean);
     currentSeries=posts.map((p,i)=>{
@@ -1611,7 +1611,7 @@ async function generateABHooks(){
   document.getElementById('ab-winner-card').style.display='none';
   document.getElementById('ab-analysis').style.display='none';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:`Generate 3 alternative LinkedIn hook lines for this post${current?` (current: "${current}")`:''}.\n\nPost:\n${post}\n\nRequirements: 1-2 sentences max. Each uses different trigger: curiosity gap, bold claim, pain point, stat, or direct challenge.\nLabel VARIANT A:, VARIANT B:, VARIANT C:\nThen add: ANALYSIS: [2-3 sentences on which is strongest and why]\n\nWrite ONLY variants and analysis.`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:800,messages:[{role:'user',content:`Generate 3 alternative LinkedIn hook lines for this post${current?` (current: "${current}")`:''}.\n\nPost:\n${post}\n\nRequirements: 1-2 sentences max. Each uses different trigger: curiosity gap, bold claim, pain point, stat, or direct challenge.\nLabel VARIANT A:, VARIANT B:, VARIANT C:\nThen add: ANALYSIS: [2-3 sentences on which is strongest and why]\n\nWrite ONLY variants and analysis.`}]})});
     const d=await r.json();const text=d.content?.[0]?.text||'';
     const variantMatches=[...text.matchAll(/VARIANT ([A-C]):\s*(.+?)(?=VARIANT [A-C]:|ANALYSIS:|$)/gis)];
     abHooks=variantMatches.map(m=>({label:`Variant ${m[1]}`,text:m[2].trim()}));
@@ -1645,7 +1645,7 @@ async function runProfileAudit(){
   document.getElementById('profile-rewrite-card').style.display='none';
   document.getElementById('profile-placeholder').innerHTML='<div class="loading-row" style="justify-content:center;padding:40px"><span class="spinner"></span> Auditing your profile...</div>';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:`Audit this LinkedIn profile. Respond ONLY in JSON:\n{"score":72,"grade":"B","summary":"Strong foundation, key gaps","sections":[{"name":"Headline","score":80,"issue":"Could be more keyword-rich","tip":"Add top 2 keywords your audience searches"},{"name":"About Section","score":65,"issue":"Lacks clear value prop","tip":"Open with who you help in first 2 lines"},{"name":"Featured Section","score":60,"issue":"Not optimized for conversion","tip":"Pin your best post or lead magnet"}],"rewrites":{"headline":"[optimized headline]","about_opener":"[optimized first 2 lines]"}}\n\nHeadline: ${headline}\nAbout: ${about.substring(0,500)}\nFeatured: ${featured}\nAudience: ${audience}`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:1500,messages:[{role:'user',content:`Audit this LinkedIn profile. Respond ONLY in JSON:\n{"score":72,"grade":"B","summary":"Strong foundation, key gaps","sections":[{"name":"Headline","score":80,"issue":"Could be more keyword-rich","tip":"Add top 2 keywords your audience searches"},{"name":"About Section","score":65,"issue":"Lacks clear value prop","tip":"Open with who you help in first 2 lines"},{"name":"Featured Section","score":60,"issue":"Not optimized for conversion","tip":"Pin your best post or lead magnet"}],"rewrites":{"headline":"[optimized headline]","about_opener":"[optimized first 2 lines]"}}\n\nHeadline: ${headline}\nAbout: ${about.substring(0,500)}\nFeatured: ${featured}\nAudience: ${audience}`}]})});
     const d=await r.json();let text=d.content?.[0]?.text||'{}';text=text.replace(/```json|```/g,'').trim();
     const audit=JSON.parse(text);
     document.getElementById('profile-score').textContent=audit.score;
@@ -1735,7 +1735,7 @@ async function generateHashtags(){
   document.getElementById('hashtag-output-card').style.display='block';
   document.getElementById('hashtag-sets').innerHTML='<div class="loading-row"><span class="spinner"></span> Generating hashtag sets...</div>';
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:`Generate 3 LinkedIn hashtag sets for: "${input}"${industry?` in ${industry} industry`:''}. Strategy: ${strategy}.\n\nFormat:\nSET A - BROAD REACH:\n#tag1 #tag2 #tag3 #tag4 #tag5\nAUDIENCE: [who this reaches]\n\nSET B - NICHE COMMUNITY:\n#tag1 #tag2 #tag3 #tag4 #tag5\nAUDIENCE: [who this reaches]\n\nSET C - TRENDING:\n#tag1 #tag2 #tag3 #tag4 #tag5\nAUDIENCE: [who this reaches]\n\nRules: 3-5 tags each, mix large + niche. These go in FIRST COMMENT not post body.`}]})});
+    const r=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:700,messages:[{role:'user',content:`Generate 3 LinkedIn hashtag sets for: "${input}"${industry?` in ${industry} industry`:''}. Strategy: ${strategy}.\n\nFormat:\nSET A - BROAD REACH:\n#tag1 #tag2 #tag3 #tag4 #tag5\nAUDIENCE: [who this reaches]\n\nSET B - NICHE COMMUNITY:\n#tag1 #tag2 #tag3 #tag4 #tag5\nAUDIENCE: [who this reaches]\n\nSET C - TRENDING:\n#tag1 #tag2 #tag3 #tag4 #tag5\nAUDIENCE: [who this reaches]\n\nRules: 3-5 tags each, mix large + niche. These go in FIRST COMMENT not post body.`}]})});
     const d=await r.json();const text=d.content?.[0]?.text||'';
     const sets=text.split(/SET [A-C]/i).filter(Boolean);
     const labels=['Broad Reach','Niche Community','Trending'];
