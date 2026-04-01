@@ -305,6 +305,9 @@ select option{background:var(--surface2)}
       </div>
     </div>
     <div style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--muted2)">Cancel anytime · No contracts · Secure payment via Stripe</div>
+    <div style="text-align:center;margin-top:10px">
+      <button id="manage-sub-btn" onclick="manageSubscription()" style="background:none;border:none;color:var(--muted2);font-size:0.75rem;cursor:pointer;text-decoration:underline;font-family:var(--font-body)">Already subscribed? Manage your subscription →</button>
+    </div>
   </div>
 </div>
 
@@ -2695,6 +2698,30 @@ async function checkout(plan) {
   } catch(e) {
     showToast('Connection error. Try again.', 'error');
     if (btn) { btn.disabled = false; btn.textContent = 'Upgrade'; }
+  }
+}
+
+async function manageSubscription() {
+  const user = window._voicioSession;
+  if (!user?.email) return;
+  const btn = document.getElementById('manage-sub-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
+  try {
+    const res = await fetch('/.netlify/functions/customer-portal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast(data.error || 'Could not open billing portal.', 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Manage Subscription'; }
+    }
+  } catch(e) {
+    showToast('Connection error. Try again.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Manage Subscription'; }
   }
 }
 
