@@ -7,6 +7,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+// Force clear session if coming from logout BEFORE identity widget loads
+if (sessionStorage.getItem("from_logout")) {
+  sessionStorage.removeItem("from_logout");
+  // Clear all Netlify Identity localStorage keys
+  Object.keys(localStorage).forEach(function(k) {
+    if (k.indexOf("gotrue") > -1 || k.indexOf("netlify") > -1) {
+      localStorage.removeItem(k);
+    }
+  });
+}
+</script>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -126,36 +138,52 @@ body{background:var(--black);color:var(--text);font-family:var(--font-body);min-
 </div>
 
 <script>
-netlifyIdentity.on("init", function(user) {
-  var fromLogout = sessionStorage.getItem("from_logout"); sessionStorage.removeItem("from_logout");
-  if (user && !fromLogout) { showLoggedIn(user); setTimeout(function(){ window.location.href="app.html"; },500); } else { if(user) netlifyIdentity.logout(); showLoggedOut(); }
+// On load - if from logout, clear everything
+var fromLogout = sessionStorage.getItem('from_logout');
+sessionStorage.removeItem('from_logout');
+sessionStorage.removeItem('voicio_session');
+if (fromLogout) {
+  Object.keys(localStorage).forEach(function(k) {
+    if (k.indexOf('gotrue') > -1 || k.indexOf('netlify') > -1) localStorage.removeItem(k);
+  });
+}
+
+netlifyIdentity.on('init', function(user) {
+  if (user && !fromLogout) {
+    showLoggedIn(user);
+    setTimeout(function(){ window.location.href = 'app.html'; }, 600);
+  } else {
+    showLoggedOut();
+  }
 });
-netlifyIdentity.on("login", function(user) {
+
+netlifyIdentity.on('login', function(user) {
   showLoggedIn(user);
   netlifyIdentity.close();
-  setTimeout(function() { window.location.href = "app.html"; }, 800);
+  setTimeout(function() { window.location.href = 'app.html'; }, 600);
 });
-netlifyIdentity.on("logout", function() { showLoggedOut(); });
+
+netlifyIdentity.on('logout', function() { showLoggedOut(); });
 
 function showLoggedIn(user) {
-  document.getElementById("auth-gate").style.display = "none";
-  document.getElementById("logged-in-state").style.display = "block";
-  var name = (user.user_metadata && user.user_metadata.full_name) || user.email.split("@")[0];
-  var initials = name.split(" ").map(function(w){return w[0];}).join("").substring(0,2).toUpperCase();
-  document.getElementById("user-initials").textContent = initials;
-  document.getElementById("user-display-name").textContent = name;
-  document.getElementById("user-display-email").textContent = user.email;
-  sessionStorage.setItem("voicio_session", JSON.stringify({
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('logged-in-state').style.display = 'block';
+  var name = (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
+  var initials = name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  document.getElementById('user-initials').textContent = initials;
+  document.getElementById('user-display-name').textContent = name;
+  document.getElementById('user-display-email').textContent = user.email;
+  sessionStorage.setItem('voicio_session', JSON.stringify({
     id: user.id, email: user.email, name: name,
-    token: user.token ? user.token.access_token : "",
-    plan: "free", loggedIn: true
+    token: user.token ? user.token.access_token : '',
+    plan: 'free', loggedIn: true
   }));
 }
 
 function showLoggedOut() {
-  document.getElementById("auth-gate").style.display = "block";
-  document.getElementById("logged-in-state").style.display = "none";
-  sessionStorage.removeItem("voicio_session");
+  document.getElementById('auth-gate').style.display = 'block';
+  document.getElementById('logged-in-state').style.display = 'none';
+  sessionStorage.removeItem('voicio_session');
 }
 </script>
 </body>
