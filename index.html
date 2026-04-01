@@ -7,8 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
 <script>
-// Auth guard — validate session before loading app
+// Auth guard — check Netlify Identity session
 (function(){
   try {
     const s = JSON.parse(sessionStorage.getItem('voicio_session') || '{}');
@@ -16,17 +18,6 @@
     window._voicioSession = s;
   } catch(e) { window.location.href = 'auth.html'; }
 })();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.3/dist/pocketbase.umd.js"></script>
-<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
-<script>
-// Init PocketBase with stored token so API calls are authenticated
-window.addEventListener('DOMContentLoaded', () => {
-  if (typeof PocketBase !== 'undefined' && window._voicioSession?.token) {
-    window.pb = new PocketBase('https://api.voicio.app');
-    window.pb.authStore.save(window._voicioSession.token, { id: window._voicioSession.id });
-  }
-});
 </script>
 <style>
 :root {
@@ -147,7 +138,25 @@ select option{background:var(--surface2)}
 .color-swatch.active{border-color:var(--text);transform:scale(1.1)}
 .font-option{padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border2);cursor:pointer;transition:all 0.15s;background:var(--surface2);font-size:0.82rem;text-align:center}
 .font-option.active{border-color:var(--accent);background:rgba(59,130,246,0.08)}
-/* CALENDAR */
+/* CALENDAR SCHEDULER */
+.cal-cell{min-height:90px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);padding:6px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:3px}
+.cal-cell:hover{border-color:var(--border2);background:var(--surface3)}
+.cal-cell.today{border-color:var(--accent)}
+.cal-cell.today .cal-cell-num{color:var(--accent2);font-weight:700}
+.cal-cell.other-month{opacity:0.3}
+.cal-cell.drag-over{border-color:var(--accent);background:rgba(59,130,246,0.08)}
+.cal-cell-num{font-size:0.72rem;font-family:var(--font-mono);color:var(--muted2);margin-bottom:2px}
+.cal-event{font-size:0.65rem;line-height:1.3;padding:3px 6px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:grab;transition:all 0.15s;border:1px solid transparent}
+.cal-event:active{cursor:grabbing;opacity:0.7}
+.cal-event.status-scheduled{background:rgba(59,130,246,0.15);color:var(--accent2);border-color:rgba(59,130,246,0.25)}
+.cal-event.status-draft{background:rgba(245,158,11,0.12);color:#fbbf24;border-color:rgba(245,158,11,0.2)}
+.cal-event.status-posted{background:rgba(16,185,129,0.12);color:#34d399;border-color:rgba(16,185,129,0.2)}
+.cal-more{font-size:0.62rem;color:var(--muted);padding:2px 4px}
+.queue-item{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;transition:all 0.15s}
+.queue-item:hover{border-color:var(--border2)}
+.queue-time{font-family:var(--font-mono);font-size:0.68rem;color:var(--muted2);margin-bottom:4px}
+.queue-preview{font-size:0.8rem;line-height:1.5;flex:1;min-width:0}
+/* old cal styles kept for other panels */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .cal-header-day{text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted);padding:6px 0;font-family:var(--font-mono)}
 .cal-day{aspect-ratio:1;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--muted);cursor:pointer;transition:all 0.15s;position:relative;flex-direction:column;gap:2px}
@@ -336,6 +345,7 @@ select option{background:var(--surface2)}
         <div class="output-actions" id="post-actions" style="display:none">
           <button class="btn btn-secondary btn-sm" onclick="copyPost()"><i data-lucide="copy"></i> Copy</button>
           <button class="btn btn-secondary btn-sm" onclick="archivePost()"><i data-lucide="archive"></i> Archive</button>
+          <button class="btn btn-secondary btn-sm" onclick="scheduleCurrentPost()"><i data-lucide="calendar-plus"></i> Schedule</button>
           <button class="btn btn-secondary btn-sm" onclick="runAudit()"><i data-lucide="bar-chart-2"></i> Audit</button>
           <button class="btn btn-secondary btn-sm" onclick="sendToWebhook()"><i data-lucide="webhook"></i> n8n</button>
           <button class="btn btn-ghost btn-sm" onclick="generatePost()"><i data-lucide="refresh-cw"></i> Regen</button>
@@ -871,33 +881,92 @@ select option{background:var(--surface2)}
 
 <!-- CALENDAR -->
 <div class="panel" id="panel-calendar">
-  <div class="panel-header">
-    <div class="panel-title">Content <span>Calendar</span></div>
-    <div class="panel-subtitle">Visual overview of your posting consistency and best times to post</div>
+  <div class="panel-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+    <div>
+      <div class="panel-title">Content <span>Calendar</span></div>
+      <div class="panel-subtitle">Schedule posts with drag-and-drop · Browser reminders fire when it's time to post</div>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-secondary btn-sm" onclick="requestNotificationPermission()">
+        <i data-lucide="bell"></i> Enable Reminders
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openScheduleModal()">
+        <i data-lucide="plus"></i> Schedule Post
+      </button>
+    </div>
   </div>
-  <div class="grid-2 gap-4">
-    <div class="flex-col gap-4">
-      <div class="card mb-4">
-        <div class="card-title" style="justify-content:space-between">
-          <span><i data-lucide="calendar"></i> <span id="cal-month-label">March 2026</span></span>
-          <div class="flex gap-2">
-            <button class="btn btn-ghost btn-sm"><i data-lucide="chevron-left"></i></button>
-            <button class="btn btn-ghost btn-sm"><i data-lucide="chevron-right"></i></button>
-          </div>
-        </div>
-        <div class="cal-grid" id="cal-grid"></div>
+
+  <!-- MAIN CALENDAR GRID -->
+  <div class="card mb-4">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div class="card-title" style="margin-bottom:0">
+        <i data-lucide="calendar"></i>
+        <span id="cal-month-label">March 2026</span>
       </div>
+      <div class="flex gap-2 align-items:center">
+        <div class="flex gap-2 mr-4" style="margin-right:16px">
+          <span style="display:flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--muted2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block"></span>Scheduled</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--muted2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>Posted</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--muted2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--yellow);display:inline-block"></span>Draft</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(-1)"><i data-lucide="chevron-left"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="changeCalMonth(1)"><i data-lucide="chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- Day headers -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">
+      <div style="text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted);padding:4px 0;font-family:var(--font-mono)">MON</div>
+      <div style="text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted);padding:4px 0;font-family:var(--font-mono)">TUE</div>
+      <div style="text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted);padding:4px 0;font-family:var(--font-mono)">WED</div>
+      <div style="text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted);padding:4px 0;font-family:var(--font-mono)">THU</div>
+      <div style="text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted);padding:4px 0;font-family:var(--font-mono)">FRI</div>
+      <div style="text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted2);padding:4px 0;font-family:var(--font-mono)">SAT</div>
+      <div style="text-align:center;font-size:0.68rem;font-weight:600;color:var(--muted2);padding:4px 0;font-family:var(--font-mono)">SUN</div>
+    </div>
+
+    <!-- Calendar days -->
+    <div id="cal-grid-full" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="grid-2 gap-4">
+    <!-- Queue panel -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0"><i data-lucide="clock"></i> Posting Queue</div>
+        <select id="queue-filter" onchange="renderQueue()" style="font-size:0.75rem;padding:5px 10px;width:auto">
+          <option value="all">All posts</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="draft">Drafts</option>
+          <option value="posted">Posted</option>
+        </select>
+      </div>
+      <div id="queue-list" class="flex-col gap-2"></div>
+    </div>
+
+    <!-- Stats + heatmap -->
+    <div class="flex-col gap-4">
       <div class="card">
         <div class="card-title"><i data-lucide="trending-up"></i> Posting Stats</div>
         <div class="grid-3 gap-3">
-          <div style="text-align:center"><div class="stat-value" style="color:var(--accent2)" id="stat-month-count">12</div><div class="stat-label">This Month</div></div>
-          <div style="text-align:center"><div class="stat-value" style="color:var(--green)">4.2</div><div class="stat-label">Per Week</div></div>
-          <div style="text-align:center"><div class="stat-value" style="color:var(--yellow)">73%</div><div class="stat-label">Consistency</div></div>
+          <div style="text-align:center">
+            <div class="stat-value" style="color:var(--accent2)" id="stat-month-count">0</div>
+            <div class="stat-label">Scheduled</div>
+          </div>
+          <div style="text-align:center">
+            <div class="stat-value" style="color:var(--green)" id="stat-posted-count">0</div>
+            <div class="stat-label">Posted</div>
+          </div>
+          <div style="text-align:center">
+            <div class="stat-value" style="color:var(--yellow)" id="stat-consistency">0%</div>
+            <div class="stat-label">Consistency</div>
+          </div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><i data-lucide="flame"></i> Engagement Heatmap</div>
-        <div style="font-size:0.75rem;color:var(--muted2);margin-bottom:12px">Best posting times based on your archive</div>
+        <div class="card-title"><i data-lucide="flame"></i> Best Times to Post</div>
+        <div style="font-size:0.75rem;color:var(--muted2);margin-bottom:12px">LinkedIn engagement by day & time</div>
         <div id="heatmap-grid" style="display:grid;grid-template-columns:40px repeat(7,1fr);gap:3px"></div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.7rem;color:var(--muted)">
           <span>Low</span>
@@ -911,26 +980,87 @@ select option{background:var(--surface2)}
         </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title"><i data-lucide="list"></i> Upcoming & Planned</div>
-      <div id="planned-posts" class="flex-col gap-3">
-        <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border2)">
-          <div style="font-size:0.7rem;font-family:var(--font-mono);color:var(--accent2);margin-bottom:4px">MAR 26 — THOUGHT LEADER</div>
-          <div style="font-size:0.82rem;line-height:1.5">Why Open Process Automation will replace proprietary DCS within the decade</div>
-          <span class="pill pill-blue mt-2">Scheduled</span>
-        </div>
-        <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border2)">
-          <div style="font-size:0.7rem;font-family:var(--font-mono);color:var(--purple);margin-bottom:4px">MAR 28 — CAROUSEL</div>
-          <div style="font-size:0.82rem;line-height:1.5">5 metrics every plant manager should track in 2025</div>
-          <span class="pill pill-purple mt-2">Draft</span>
-        </div>
-        <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border2)">
-          <div style="font-size:0.7rem;font-family:var(--font-mono);color:var(--muted);margin-bottom:4px">APR 1 — STORYTELLER</div>
-          <div style="font-size:0.82rem;line-height:1.5">The day our SCADA system crashed — and what it taught me</div>
-          <span class="pill pill-green mt-2">Idea</span>
-        </div>
+  </div>
+</div>
+
+<!-- SCHEDULE POST MODAL -->
+<div id="schedule-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:520px;max-width:90vw;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800">Schedule a Post</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeScheduleModal()" style="padding:6px 10px"><i data-lucide="x" style="width:14px;height:14px"></i></button>
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="label">Post Content</label>
+      <textarea id="sched-content" placeholder="Paste or write your post here..." style="min-height:120px"></textarea>
+    </div>
+
+    <div class="flex gap-3 mb-3">
+      <div class="form-group" style="flex:1">
+        <label class="label">Date</label>
+        <input type="date" id="sched-date">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="label">Time</label>
+        <input type="time" id="sched-time" value="08:00">
       </div>
     </div>
+
+    <div class="flex gap-3 mb-3">
+      <div class="form-group" style="flex:1">
+        <label class="label">Format</label>
+        <select id="sched-format">
+          <option value="post">Standard Post</option>
+          <option value="carousel">Carousel</option>
+          <option value="thread">Thread</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="label">Tone</label>
+        <select id="sched-tone">
+          <option value="thought-leader">Thought Leader</option>
+          <option value="storyteller">Storyteller</option>
+          <option value="technical">Technical</option>
+          <option value="controversial">Controversial</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="label">Status</label>
+      <select id="sched-status">
+        <option value="scheduled">Scheduled</option>
+        <option value="draft">Draft</option>
+      </select>
+    </div>
+
+    <!-- Best time suggestions -->
+    <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:18px;font-size:0.8rem;color:var(--muted2);line-height:1.6">
+      <strong style="color:var(--accent2)">💡 Best times for LinkedIn:</strong> Mon–Wed 7–9am, Tue–Thu 12pm, Tue 5–6pm
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap" id="quick-time-btns"></div>
+    </div>
+
+    <div class="flex gap-3">
+      <button class="btn btn-primary" style="flex:1" onclick="saveScheduledPost()">
+        <i data-lucide="calendar-plus"></i> Schedule Post
+      </button>
+      <button class="btn btn-ghost" onclick="closeScheduleModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DAY DETAIL MODAL -->
+<div id="day-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:480px;max-width:90vw">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700" id="day-modal-title">Monday, March 25</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeDayModal()" style="padding:6px 10px"><i data-lucide="x" style="width:14px;height:14px"></i></button>
+    </div>
+    <div id="day-modal-posts" class="flex-col gap-3"></div>
+    <button class="btn btn-secondary btn-full mt-4" onclick="closeDayModal();openScheduleModal()">
+      <i data-lucide="plus"></i> Add post to this day
+    </button>
   </div>
 </div>
 
@@ -1073,7 +1203,11 @@ function navigate(panel) {
   const navEl = document.getElementById('nav-'+panel);
   if (panelEl) panelEl.classList.add('active');
   if (navEl) navEl.classList.add('active');
-  if (panel==='calendar'){renderCalendar();renderHeatmap();}
+  if (panel==='calendar'){
+    if (calViewYear === undefined) initCalendarView();
+    renderCalendar();
+    renderHeatmap();
+  }
   if (panel==='hooks'){renderHooks();updatePillarSelects();}
   if (panel==='pillars'){renderPillars();updatePillarSelects();}
   if (panel==='savedprompts') renderSavedPrompts();
@@ -1598,26 +1732,393 @@ function renderSavedPrompts(){
   if(typeof lucide!=='undefined') lucide.createIcons();
 }
 
-// ========== CALENDAR ==========
-function renderCalendar(){
-  const grid=document.getElementById('cal-grid');if(!grid)return;
-  const now=new Date();const year=now.getFullYear();const month=now.getMonth();const today=now.getDate();
-  const daysInMonth=new Date(year,month+1,0).getDate();
-  const firstDow=new Date(year,month,1).getDay();
-  const offset=(firstDow+6)%7;
-  const postedDays=new Set([3,5,8,10,12,15,17,19,22,24]);
-  samplePosts.forEach(p=>{const d=parseInt(p.date);if(!isNaN(d))postedDays.add(d);});
-  const dayNames=['Mo','Tu','We','Th','Fr','Sa','Su'];
-  let html=dayNames.map(d=>`<div class="cal-header-day">${d}</div>`).join('');
-  for(let i=0;i<offset;i++) html+=`<div class="cal-day empty"></div>`;
-  for(let d=1;d<=daysInMonth;d++){
-    const hasPost=postedDays.has(d);const isToday=d===today;
-    html+=`<div class="cal-day ${hasPost?'has-post':''} ${isToday?'today':''}" title="${hasPost?'Post published':'Click to plan'}">${d}</div>`;
+// ========== SCHEDULER ==========
+let scheduledPosts = JSON.parse(localStorage.getItem('voicio_scheduled') || '[]');
+let calViewYear, calViewMonth;
+let draggedPostId = null;
+let notificationsEnabled = false;
+let notificationTimers = [];
+
+function initCalendarView() {
+  const now = new Date();
+  calViewYear = now.getFullYear();
+  calViewMonth = now.getMonth();
+}
+
+function changeCalMonth(dir) {
+  calViewMonth += dir;
+  if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+  if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  if (calViewYear === undefined) initCalendarView();
+  const grid = document.getElementById('cal-grid-full');
+  const label = document.getElementById('cal-month-label');
+  if (!grid) return;
+
+  const now = new Date();
+  const firstDay = new Date(calViewYear, calViewMonth, 1);
+  const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+  const offset = (firstDay.getDay() + 6) % 7; // Mon-based
+
+  if (label) label.textContent = firstDay.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+
+  // Build map of posts by date string
+  const postsByDate = {};
+  scheduledPosts.forEach(p => {
+    const key = p.date;
+    if (!postsByDate[key]) postsByDate[key] = [];
+    postsByDate[key].push(p);
+  });
+
+  let html = '';
+
+  // Leading empty cells (prev month)
+  const prevDays = new Date(calViewYear, calViewMonth, 0).getDate();
+  for (let i = offset - 1; i >= 0; i--) {
+    const d = prevDays - i;
+    html += `<div class="cal-cell other-month"><div class="cal-cell-num">${d}</div></div>`;
   }
-  grid.innerHTML=html;
-  const label=document.getElementById('cal-month-label');
-  if(label)label.textContent=new Date(year,month,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-  document.getElementById('stat-month-count').textContent=postedDays.size;
+
+  // Current month cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calViewYear}-${String(calViewMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = d === now.getDate() && calViewMonth === now.getMonth() && calViewYear === now.getFullYear();
+    const posts = postsByDate[dateStr] || [];
+    const shown = posts.slice(0, 3);
+    const extra = posts.length - shown.length;
+
+    html += `<div class="cal-cell ${isToday?'today':''}" 
+      ondragover="calDragOver(event,this)" 
+      ondrop="calDrop(event,'${dateStr}')"
+      ondragleave="this.classList.remove('drag-over')"
+      onclick="openDayModal('${dateStr}',${d})">
+      <div class="cal-cell-num">${d}</div>
+      ${shown.map(p => `
+        <div class="cal-event status-${p.status}" 
+          draggable="true"
+          ondragstart="calDragStart(event,'${p.id}')"
+          onclick="event.stopPropagation();openEditPost('${p.id}')"
+          title="${p.content.substring(0,80)}">
+          ${p.time ? p.time+' · ' : ''}${p.content.substring(0,30)}...
+        </div>`).join('')}
+      ${extra > 0 ? `<div class="cal-more">+${extra} more</div>` : ''}
+    </div>`;
+  }
+
+  // Trailing empty cells
+  const totalCells = offset + daysInMonth;
+  const trailingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let d = 1; d <= trailingCells; d++) {
+    html += `<div class="cal-cell other-month"><div class="cal-cell-num">${d}</div></div>`;
+  }
+
+  grid.innerHTML = html;
+  updateCalStats();
+  renderQueue();
+}
+
+// ========== DRAG AND DROP ==========
+function calDragStart(e, postId) {
+  draggedPostId = postId;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', postId);
+}
+function calDragOver(e, cell) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('drag-over'));
+  cell.classList.add('drag-over');
+}
+function calDrop(e, dateStr) {
+  e.preventDefault();
+  document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('drag-over'));
+  const postId = e.dataTransfer.getData('text/plain') || draggedPostId;
+  if (!postId) return;
+  const post = scheduledPosts.find(p => p.id === postId);
+  if (post) {
+    post.date = dateStr;
+    saveScheduledPosts();
+    renderCalendar();
+    scheduleNotifications();
+    showToast(`Post moved to ${dateStr} ✓`, 'success');
+  }
+  draggedPostId = null;
+}
+
+// ========== SCHEDULE MODAL ==========
+function openScheduleModal(prefillContent) {
+  const modal = document.getElementById('schedule-modal');
+  modal.style.display = 'flex';
+  // Default date to today
+  const now = new Date();
+  document.getElementById('sched-date').value = now.toISOString().split('T')[0];
+  document.getElementById('sched-time').value = '08:00';
+  if (prefillContent) document.getElementById('sched-content').value = prefillContent;
+
+  // Quick time buttons
+  const times = [
+    { label: 'Mon 8am', day: 1, time: '08:00' },
+    { label: 'Tue 8am', day: 2, time: '08:00' },
+    { label: 'Wed 8am', day: 3, time: '08:00' },
+    { label: 'Tue 12pm', day: 2, time: '12:00' },
+    { label: 'Thu 12pm', day: 4, time: '12:00' },
+  ];
+  const container = document.getElementById('quick-time-btns');
+  if (container) {
+    container.innerHTML = times.map(t => `
+      <button class="btn btn-ghost btn-sm" style="font-size:0.7rem;padding:4px 10px" onclick="setQuickTime(${t.day},'${t.time}')">
+        ${t.label}
+      </button>`).join('');
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function setQuickTime(dayOfWeek, time) {
+  const d = new Date();
+  const diff = (dayOfWeek - d.getDay() + 7) % 7 || 7;
+  d.setDate(d.getDate() + diff);
+  document.getElementById('sched-date').value = d.toISOString().split('T')[0];
+  document.getElementById('sched-time').value = time;
+}
+
+function closeScheduleModal() {
+  document.getElementById('schedule-modal').style.display = 'none';
+  document.getElementById('sched-content').value = '';
+}
+
+function saveScheduledPost() {
+  const content = document.getElementById('sched-content').value.trim();
+  const date = document.getElementById('sched-date').value;
+  const time = document.getElementById('sched-time').value;
+  const format = document.getElementById('sched-format').value;
+  const tone = document.getElementById('sched-tone').value;
+  const status = document.getElementById('sched-status').value;
+
+  if (!content) { showToast('Add post content first', 'warn'); return; }
+  if (!date) { showToast('Pick a date', 'warn'); return; }
+
+  const post = {
+    id: Date.now().toString(),
+    content, date, time, format, tone, status,
+    created: new Date().toISOString()
+  };
+
+  scheduledPosts.push(post);
+  saveScheduledPosts();
+  closeScheduleModal();
+  renderCalendar();
+  scheduleNotifications();
+  showToast(`Post scheduled for ${date} at ${time} ✓`, 'success');
+}
+
+// ========== DAY MODAL ==========
+function openDayModal(dateStr, dayNum) {
+  const modal = document.getElementById('day-modal');
+  const title = document.getElementById('day-modal-title');
+  const postsList = document.getElementById('day-modal-posts');
+  modal.style.display = 'flex';
+
+  const d = new Date(dateStr + 'T12:00:00');
+  title.textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  const posts = scheduledPosts.filter(p => p.date === dateStr);
+  if (!posts.length) {
+    postsList.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.85rem">No posts scheduled for this day</div>`;
+  } else {
+    postsList.innerHTML = posts.map(p => `
+      <div class="queue-item">
+        <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:${statusColor(p.status)}"></div>
+        <div style="flex:1;min-width:0">
+          <div class="queue-time">${p.time || 'No time'} · ${p.format} · ${p.tone}</div>
+          <div class="queue-preview">${p.content.substring(0, 100)}${p.content.length > 100 ? '...' : ''}</div>
+        </div>
+        <div class="flex gap-1">
+          <button class="btn btn-secondary btn-sm" onclick="copyAndPost('${p.id}')"><i data-lucide="external-link" style="width:11px;height:11px"></i> Post</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deletePost('${p.id}');closeDayModal()"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Pre-fill schedule modal with this date
+  document.getElementById('sched-date').value = dateStr;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeDayModal() {
+  document.getElementById('day-modal').style.display = 'none';
+}
+
+// ========== QUEUE ==========
+function renderQueue() {
+  const list = document.getElementById('queue-list');
+  if (!list) return;
+  const filter = document.getElementById('queue-filter')?.value || 'all';
+  const now = new Date().toISOString().split('T')[0];
+
+  let posts = [...scheduledPosts].sort((a, b) => {
+    const da = a.date + (a.time || '');
+    const db = b.date + (b.time || '');
+    return da.localeCompare(db);
+  });
+
+  if (filter !== 'all') posts = posts.filter(p => p.status === filter);
+
+  if (!posts.length) {
+    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:0.82rem">No posts ${filter !== 'all' ? `with status "${filter}"` : 'scheduled yet'}</div>`;
+    return;
+  }
+
+  list.innerHTML = posts.slice(0, 8).map(p => {
+    const isPast = p.date < now;
+    return `<div class="queue-item" style="${isPast && p.status === 'scheduled' ? 'opacity:0.6' : ''}">
+      <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:${statusColor(p.status)}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="queue-time">${formatQueueDate(p.date)} ${p.time||''} · <span style="text-transform:capitalize">${p.status}</span></div>
+        <div class="queue-preview">${p.content.substring(0,90)}${p.content.length>90?'...':''}</div>
+      </div>
+      <div class="flex gap-1" style="flex-shrink:0">
+        <button class="btn btn-secondary btn-sm" onclick="copyAndPost('${p.id}')" title="Copy & open LinkedIn"><i data-lucide="external-link" style="width:11px;height:11px"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="markAsPosted('${p.id}')" title="Mark as posted"><i data-lucide="check" style="width:11px;height:11px"></i></button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deletePost('${p.id}')" title="Delete"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function formatQueueDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const now = new Date();
+  const diff = Math.round((d - now) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff === -1) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+function statusColor(status) {
+  const colors = { scheduled:'var(--accent)', posted:'var(--green)', draft:'var(--yellow)', idea:'var(--purple)' };
+  return colors[status] || 'var(--muted)';
+}
+
+// ========== POST ACTIONS ==========
+function copyAndPost(postId) {
+  const post = scheduledPosts.find(p => p.id === postId);
+  if (!post) return;
+  navigator.clipboard.writeText(post.content).then(() => {
+    showToast('Copied! Opening LinkedIn...', 'success');
+    setTimeout(() => window.open('https://www.linkedin.com/feed/', '_blank'), 600);
+    // Auto-mark as posted after 10s
+    setTimeout(() => {
+      if (post.status !== 'posted') {
+        post.status = 'posted';
+        saveScheduledPosts();
+        renderCalendar();
+      }
+    }, 10000);
+  });
+}
+
+function markAsPosted(postId) {
+  const post = scheduledPosts.find(p => p.id === postId);
+  if (!post) return;
+  post.status = 'posted';
+  saveScheduledPosts();
+  renderCalendar();
+  showToast('Marked as posted ✓', 'success');
+}
+
+function deletePost(postId) {
+  scheduledPosts = scheduledPosts.filter(p => p.id !== postId);
+  saveScheduledPosts();
+  renderCalendar();
+  showToast('Post removed', 'info');
+}
+
+function openEditPost(postId) {
+  const post = scheduledPosts.find(p => p.id === postId);
+  if (!post) return;
+  openScheduleModal(post.content);
+  document.getElementById('sched-date').value = post.date;
+  document.getElementById('sched-time').value = post.time || '08:00';
+  document.getElementById('sched-format').value = post.format || 'post';
+  document.getElementById('sched-tone').value = post.tone || 'thought-leader';
+  document.getElementById('sched-status').value = post.status || 'scheduled';
+  // Remove old post, new one saved on submit
+  scheduledPosts = scheduledPosts.filter(p => p.id !== postId);
+}
+
+// ========== STATS ==========
+function updateCalStats() {
+  const now = new Date().toISOString().split('T')[0];
+  const monthStr = `${calViewYear}-${String(calViewMonth+1).padStart(2,'0')}`;
+  const monthPosts = scheduledPosts.filter(p => p.date.startsWith(monthStr));
+  const scheduled = monthPosts.filter(p => p.status === 'scheduled').length;
+  const posted = monthPosts.filter(p => p.status === 'posted').length;
+  const daysInMonth = new Date(calViewYear, calViewMonth+1, 0).getDate();
+  const weekdays = Math.floor(daysInMonth * 5/7);
+  const consistency = weekdays > 0 ? Math.min(100, Math.round(((scheduled+posted)/weekdays)*100)) : 0;
+
+  const el1 = document.getElementById('stat-month-count');
+  const el2 = document.getElementById('stat-posted-count');
+  const el3 = document.getElementById('stat-consistency');
+  if (el1) el1.textContent = scheduled;
+  if (el2) el2.textContent = posted;
+  if (el3) el3.textContent = consistency + '%';
+}
+
+// ========== NOTIFICATIONS ==========
+function requestNotificationPermission() {
+  if (!('Notification' in window)) { showToast('Browser notifications not supported', 'warn'); return; }
+  Notification.requestPermission().then(perm => {
+    notificationsEnabled = perm === 'granted';
+    if (notificationsEnabled) {
+      showToast('Reminders enabled ✓ You\'ll be notified when it\'s time to post', 'success');
+      scheduleNotifications();
+    } else {
+      showToast('Permission denied — enable notifications in browser settings', 'warn');
+    }
+  });
+}
+
+function scheduleNotifications() {
+  if (!notificationsEnabled) return;
+  // Clear existing timers
+  notificationTimers.forEach(t => clearTimeout(t));
+  notificationTimers = [];
+
+  const now = Date.now();
+  scheduledPosts.forEach(post => {
+    if (post.status !== 'scheduled' || !post.time) return;
+    const postTime = new Date(`${post.date}T${post.time}:00`).getTime();
+    const delay = postTime - now;
+    if (delay > 0 && delay < 7 * 24 * 60 * 60 * 1000) { // within 7 days
+      const timer = setTimeout(() => {
+        new Notification('⏰ Time to post on LinkedIn!', {
+          body: post.content.substring(0, 100) + '...',
+          icon: '/favicon.ico',
+          tag: post.id
+        });
+      }, delay);
+      notificationTimers.push(timer);
+    }
+  });
+}
+
+function saveScheduledPosts() {
+  localStorage.setItem('voicio_scheduled', JSON.stringify(scheduledPosts));
+}
+
+// Also wire "Schedule" button into generated post actions
+function scheduleCurrentPost() {
+  const content = document.getElementById('post-output')?.textContent;
+  if (!content || content.includes('will appear here')) { showToast('Generate a post first', 'warn'); return; }
+  navigate('calendar');
+  openScheduleModal(content);
 }
 
 // ========== HEATMAP ==========
@@ -1712,9 +2213,29 @@ function showToast(msg,type='success'){
 function initApp(){
   if(typeof lucide==='undefined'){setTimeout(initApp,50);return;}
   lucide.createIcons();
+  initCalendarView();
+
+  // Seed sample scheduled posts if empty
+  if (!scheduledPosts.length) {
+    const now = new Date();
+    const dateStr = (offset) => { const d=new Date(now); d.setDate(d.getDate()+offset); return d.toISOString().split('T')[0]; };
+    scheduledPosts = [
+      { id:'seed1', content:"Why Open Process Automation will replace proprietary DCS within the decade — and why most engineers aren't ready.", date:dateStr(0), time:'08:00', format:'post', tone:'thought-leader', status:'scheduled', created:new Date().toISOString() },
+      { id:'seed2', content:"5 metrics every plant manager should track in 2025: OEE, MTTR, alarm flood rate, loop health index, and energy intensity per unit.", date:dateStr(2), time:'12:00', format:'carousel', tone:'technical', status:'draft', created:new Date().toISOString() },
+      { id:'seed3', content:"The day our SCADA system crashed during a $2M batch run — and what I wish I knew before it happened.", date:dateStr(5), time:'08:00', format:'post', tone:'storyteller', status:'scheduled', created:new Date().toISOString() },
+    ];
+    saveScheduledPosts();
+  }
+
   renderCarousel();renderHistory();renderCalendar();renderHeatmap();
   renderHooks();renderPillars();renderSavedPrompts();renderSavedHashtags();
   updatePillarSelects();updateSheetsStatus();
+
+  // Notifications
+  if ('Notification' in window && Notification.permission === 'granted') {
+    notificationsEnabled = true;
+    scheduleNotifications();
+  }
 
   // Set user avatar initials from session
   const sess = window._voicioSession;

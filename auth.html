@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.3/dist/pocketbase.umd.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"><\/script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
@@ -15,275 +15,66 @@ html{font-size:16px}
   --black:#050507; --dark:#0a0a0f; --surface:#0f0f16; --surface2:#16161f; --surface3:#1e1e2a;
   --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.1); --border3:rgba(255,255,255,0.16);
   --gold:#c9a84c; --gold2:#e8c96d; --gold-glow:rgba(201,168,76,0.2);
-  --red:#ef4444; --green:#10b981;
   --text:#eeeef2; --text2:#9898a8; --text3:#5c5c70;
-  --font-display:'Fraunces',serif; --font-body:'DM Sans',sans-serif; --font-mono:'DM Mono',monospace;
+  --font-display:"Fraunces",serif; --font-body:"DM Sans",sans-serif; --font-mono:"DM Mono",monospace;
 }
-body{
-  background:var(--black); color:var(--text);
-  font-family:var(--font-body); min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-  display:flex; overflow:hidden;
-}
-
-/* ── LEFT PANEL ── */
-.auth-left{
-  width:52%; min-height:100vh;
-  background:var(--surface);
-  border-right:1px solid var(--border);
-  display:flex; flex-direction:column;
-  justify-content:space-between;
-  padding:40px 56px; position:relative; overflow:hidden;
-}
-.auth-left::before{
-  content:''; position:absolute; top:-30%; right:-20%;
-  width:70%; height:70%;
-  background:radial-gradient(ellipse,rgba(201,168,76,0.08) 0%,transparent 65%);
-  pointer-events:none;
-}
-.auth-left::after{
-  content:''; position:absolute; bottom:-20%; left:-10%;
-  width:50%; height:50%;
-  background:radial-gradient(ellipse,rgba(59,107,255,0.05) 0%,transparent 65%);
-  pointer-events:none;
-}
-
-/* Grain */
-.auth-left-inner{ position:relative; z-index:1; height:100%; display:flex; flex-direction:column; justify-content:space-between; }
-
-.auth-brand{
-  display:flex; align-items:center; gap:12px;
-  font-family:var(--font-display); font-size:1.3rem; font-weight:700;
-  text-decoration:none; color:var(--text);
-}
-.brand-mark{
-  width:38px; height:38px; border-radius:10px;
-  background:linear-gradient(135deg,var(--gold),#8b6914);
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-display); font-weight:900; font-size:1rem; color:var(--black);
-  box-shadow:0 0 24px var(--gold-glow);
-}
-
-.auth-hero-text{ flex:1; display:flex; flex-direction:column; justify-content:center; padding:40px 0; }
-.auth-headline{
-  font-family:var(--font-display);
-  font-size:clamp(2.4rem,3.5vw,3.8rem);
-  font-weight:900; line-height:0.95;
-  letter-spacing:-0.03em; margin-bottom:24px;
-}
-.auth-headline em{ font-style:italic; font-weight:300; color:var(--gold); display:block; }
-.auth-tagline{ font-size:1rem; color:var(--text2); font-weight:300; line-height:1.7; max-width:360px; }
-
-/* Testimonial */
-.auth-testimonial{
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--border2);
-  border-radius:14px; padding:24px 28px;
-  margin-bottom:0;
-}
-.auth-quote{ font-size:0.92rem; color:var(--text2); font-style:italic; line-height:1.65; margin-bottom:16px; }
-.auth-quote-author{ display:flex; align-items:center; gap:10px; }
-.author-avatar{
-  width:32px; height:32px; border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),#8b6914);
-  display:flex; align-items:center; justify-content:center;
-  font-size:0.75rem; font-weight:700; color:var(--black);
-}
-.author-name{ font-size:0.82rem; font-weight:600; }
-.author-role{ font-size:0.72rem; color:var(--text3); }
-
-/* Feature pills */
-.auth-features{ display:flex; gap:8px; flex-wrap:wrap; margin-top:28px; }
-.auth-pill{
-  font-family:var(--font-mono); font-size:0.65rem; font-weight:500;
-  letter-spacing:0.06em; text-transform:uppercase;
-  padding:5px 12px; border-radius:20px;
-  background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2);
-  color:var(--gold);
-}
-
-/* ── RIGHT PANEL ── */
-.auth-right{
-  flex:1; display:flex; align-items:center; justify-content:center;
-  padding:40px 56px; min-height:100vh; overflow-y:auto;
-}
-.auth-form-wrap{ width:100%; max-width:400px; }
-
-/* VIEWS */
-.view{ display:none; animation:fadeUp 0.3s ease; }
-.view.active{ display:block; }
-@keyframes fadeUp{ from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-
-.view-title{
-  font-family:var(--font-display); font-size:1.9rem; font-weight:700;
-  letter-spacing:-0.03em; margin-bottom:8px; line-height:1.1;
-}
-.view-subtitle{ font-size:0.875rem; color:var(--text2); margin-bottom:36px; line-height:1.6; }
-.view-subtitle a{ color:var(--gold); text-decoration:none; }
-.view-subtitle a:hover{ text-decoration:underline; }
-
-/* Form elements */
-.field{ margin-bottom:18px; }
-.field-label{
-  display:block; font-family:var(--font-mono); font-size:0.68rem;
-  font-weight:500; color:var(--text3); letter-spacing:0.08em;
-  text-transform:uppercase; margin-bottom:7px;
-}
-.field-wrap{ position:relative; }
-.field-input{
-  width:100%; background:var(--surface2); border:1px solid var(--border2);
-  color:var(--text); font-family:var(--font-body); font-size:0.9rem;
-  border-radius:8px; padding:13px 16px; outline:none;
-  transition:border-color 0.2s, box-shadow 0.2s;
-}
-.field-input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,0.1); }
-.field-input.error{ border-color:var(--red); box-shadow:0 0 0 3px rgba(239,68,68,0.1); }
-.field-input.success{ border-color:var(--green); }
-.field-input::placeholder{ color:var(--text3); }
-.field-icon{
-  position:absolute; right:14px; top:50%; transform:translateY(-50%);
-  color:var(--text3); cursor:pointer; transition:color 0.2s;
-  background:none; border:none; padding:0; line-height:0;
-}
-.field-icon:hover{ color:var(--text2); }
-.field-error{ font-size:0.75rem; color:var(--red); margin-top:5px; display:none; }
-.field-error.show{ display:block; }
-
-/* Password strength */
-.password-strength{ margin-top:8px; display:none; }
-.password-strength.show{ display:block; }
-.strength-bars{ display:flex; gap:4px; margin-bottom:4px; }
-.strength-bar{ flex:1; height:3px; border-radius:2px; background:var(--surface3); transition:background 0.3s; }
-.strength-label{ font-size:0.7rem; color:var(--text3); font-family:var(--font-mono); }
-
-/* Checkbox */
-.checkbox-row{ display:flex; align-items:flex-start; gap:10px; margin-bottom:20px; }
-.checkbox-row input[type=checkbox]{ width:16px; height:16px; margin-top:2px; accent-color:var(--gold); cursor:pointer; flex-shrink:0; }
-.checkbox-label{ font-size:0.82rem; color:var(--text2); line-height:1.5; cursor:pointer; }
-.checkbox-label a{ color:var(--gold); text-decoration:none; }
-
-/* Divider */
-.or-divider{
-  display:flex; align-items:center; gap:14px;
-  margin:24px 0; color:var(--text3); font-size:0.75rem;
-  font-family:var(--font-mono); letter-spacing:0.08em;
-}
-.or-divider::before,.or-divider::after{ content:''; flex:1; height:1px; background:var(--border2); }
-
-/* Social buttons */
-.social-btn{
-  width:100%; padding:12px 16px;
-  background:var(--surface2); border:1px solid var(--border2);
-  color:var(--text); font-family:var(--font-body); font-size:0.875rem; font-weight:400;
-  border-radius:8px; cursor:pointer; transition:all 0.2s;
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  margin-bottom:10px; text-decoration:none;
-}
-.social-btn:hover{ border-color:var(--border3); background:var(--surface3); }
-.social-icon{ width:18px; height:18px; flex-shrink:0; }
-
-/* Submit button */
-.btn-submit{
-  width:100%; padding:14px;
-  background:var(--gold); color:var(--black);
-  font-family:var(--font-body); font-size:0.95rem; font-weight:600;
-  border:none; border-radius:8px; cursor:pointer;
-  transition:all 0.2s; box-shadow:0 4px 24px var(--gold-glow);
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  margin-top:8px;
-}
-.btn-submit:hover{ background:var(--gold2); transform:translateY(-1px); box-shadow:0 8px 32px rgba(201,168,76,0.3); }
-.btn-submit:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
-.btn-submit .spinner{
-  width:16px; height:16px; border:2px solid rgba(0,0,0,0.2);
-  border-top-color:var(--black); border-radius:50%;
-  animation:spin 0.6s linear infinite; display:none;
-}
-.btn-submit.loading .btn-text{ display:none; }
-.btn-submit.loading .spinner{ display:block; }
-@keyframes spin{ to{transform:rotate(360deg)} }
-
-/* Alert */
-.alert{
-  padding:12px 16px; border-radius:8px;
-  font-size:0.82rem; line-height:1.5; margin-bottom:18px;
-  display:none;
-}
-.alert.show{ display:block; }
-.alert-error{ background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); color:#fca5a5; }
-.alert-success{ background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); color:#6ee7b7; }
-
-/* Forgot link */
-.forgot-link{
-  float:right; font-size:0.78rem; color:var(--text3);
-  text-decoration:none; transition:color 0.2s;
-}
-.forgot-link:hover{ color:var(--gold); }
-
-/* Back link */
-.back-link{
-  display:inline-flex; align-items:center; gap:6px;
-  font-size:0.8rem; color:var(--text3); text-decoration:none;
-  margin-bottom:28px; transition:color 0.2s; cursor:pointer;
-  background:none; border:none; font-family:var(--font-body); padding:0;
-}
-.back-link:hover{ color:var(--text2); }
-.back-link svg{ width:14px; height:14px; }
-
-/* Reset sent state */
-.reset-icon{ font-size:2.5rem; margin-bottom:16px; display:block; }
-
-/* Plan selector (signup) */
-.plan-select{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
-.plan-option{
-  border:1px solid var(--border2); border-radius:8px; padding:14px;
-  cursor:pointer; transition:all 0.2s; background:var(--surface2);
-}
-.plan-option.selected{ border-color:var(--gold); background:rgba(201,168,76,0.06); }
-.plan-name{ font-family:var(--font-display); font-size:0.95rem; font-weight:700; margin-bottom:2px; }
-.plan-price{ font-size:0.75rem; color:var(--text3); font-family:var(--font-mono); }
-.plan-option.selected .plan-price{ color:var(--gold); }
-
-/* Steps indicator */
-.steps-indicator{ display:flex; align-items:center; gap:6px; margin-bottom:32px; }
-.step-dot{ width:6px; height:6px; border-radius:50%; background:var(--surface3); transition:all 0.3s; }
-.step-dot.active{ background:var(--gold); width:20px; border-radius:3px; }
-.step-dot.done{ background:rgba(201,168,76,0.4); }
-
-/* Success screen */
-.success-screen{ text-align:center; padding:20px 0; }
-.success-icon{ font-size:3rem; margin-bottom:20px; display:block; animation:popIn 0.5s ease; }
-@keyframes popIn{ 0%{transform:scale(0)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
-.success-title{ font-family:var(--font-display); font-size:1.8rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:10px; }
-.success-sub{ font-size:0.9rem; color:var(--text2); margin-bottom:32px; line-height:1.6; }
-
-/* Mobile */
-@media(max-width:768px){
-  .auth-left{ display:none; }
-  .auth-right{ padding:32px 24px; }
-  body{ overflow-y:auto; }
-}
+body{background:var(--black);color:var(--text);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;display:flex;overflow:hidden}
+.auth-left{width:52%;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:40px 56px;position:relative;overflow:hidden}
+.auth-left::before{content:"";position:absolute;top:-30%;right:-20%;width:70%;height:70%;background:radial-gradient(ellipse,rgba(201,168,76,0.08) 0%,transparent 65%);pointer-events:none}
+.auth-left::after{content:"";position:absolute;bottom:-20%;left:-10%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(59,107,255,0.05) 0%,transparent 65%);pointer-events:none}
+.auth-left-inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:space-between}
+.auth-brand{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-size:1.3rem;font-weight:700;text-decoration:none;color:var(--text)}
+.brand-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#8b6914);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:1rem;color:var(--black);box-shadow:0 0 24px var(--gold-glow)}
+.auth-hero-text{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0}
+.auth-headline{font-family:var(--font-display);font-size:clamp(2.4rem,3.5vw,3.8rem);font-weight:900;line-height:0.95;letter-spacing:-0.03em;margin-bottom:24px}
+.auth-headline em{font-style:italic;font-weight:300;color:var(--gold);display:block}
+.auth-tagline{font-size:1rem;color:var(--text2);font-weight:300;line-height:1.7;max-width:360px}
+.auth-features{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
+.auth-pill{font-family:var(--font-mono);font-size:0.65rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);color:var(--gold)}
+.auth-testimonial{background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:14px;padding:24px 28px}
+.auth-quote{font-size:0.92rem;color:var(--text2);font-style:italic;line-height:1.65;margin-bottom:16px}
+.auth-quote-author{display:flex;align-items:center;gap:10px}
+.author-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8b6914);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--black)}
+.author-name{font-size:0.82rem;font-weight:600}
+.author-role{font-size:0.72rem;color:var(--text3)}
+.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 56px;min-height:100vh}
+.auth-form-wrap{width:100%;max-width:400px}
+.welcome-title{font-family:var(--font-display);font-size:2rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:8px;line-height:1.1}
+.welcome-sub{font-size:0.875rem;color:var(--text2);margin-bottom:32px}
+.btn-launch{width:100%;padding:14px;background:var(--gold);color:var(--black);font-family:var(--font-body);font-size:0.95rem;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 24px var(--gold-glow);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px}
+.btn-launch:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-signup{width:100%;padding:14px;background:transparent;color:var(--text2);font-family:var(--font-body);font-size:0.875rem;font-weight:400;border:1px solid var(--border2);border-radius:8px;cursor:pointer;transition:all 0.2s}
+.btn-signup:hover{color:var(--text);border-color:var(--border3)}
+.or-divider{display:flex;align-items:center;gap:14px;margin:20px 0;color:var(--text3);font-size:0.75rem;font-family:var(--font-mono);letter-spacing:0.08em}
+.or-divider::before,.or-divider::after{content:"";flex:1;height:1px;background:var(--border2)}
+.trust-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:28px;flex-wrap:wrap}
+.trust-item{font-size:0.72rem;color:var(--text3);font-family:var(--font-mono);display:flex;align-items:center;gap:5px}
+.logged-in-state{display:none;text-align:center;padding:20px 0}
+.user-avatar-big{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8b6914);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:1.4rem;color:var(--black);margin:0 auto 16px}
+.logged-in-name{font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:4px}
+.logged-in-email{font-size:0.82rem;color:var(--text3);margin-bottom:24px}
+.btn-go{width:100%;padding:14px;background:var(--gold);color:var(--black);font-family:var(--font-body);font-size:0.95rem;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 24px var(--gold-glow);margin-bottom:10px}
+.btn-go:hover{background:var(--gold2)}
+.btn-logout{width:100%;padding:12px;background:transparent;color:var(--text3);font-family:var(--font-body);font-size:0.82rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s}
+.btn-logout:hover{color:var(--text);border-color:var(--border2)}
+@media(max-width:768px){.auth-left{display:none}.auth-right{padding:32px 24px}body{overflow-y:auto}}
 </style>
 </head>
 <body>
 
-<!-- LEFT PANEL -->
 <div class="auth-left">
   <div class="auth-left-inner">
     <a href="landing.html" class="auth-brand">
       <div class="brand-mark">V</div>
       <span style="display:inline-flex;gap:0">Voi<span style="color:var(--gold)">cio</span></span>
     </a>
-
     <div class="auth-hero-text">
       <h2 class="auth-headline">
         Write less.<br>
         <em>Sound more</em><br>
         like you.
       </h2>
-      <p class="auth-tagline">
-        The LinkedIn content OS for creators who refuse to sound like everyone else. AI-powered, voice-trained, algorithm-aware.
-      </p>
+      <p class="auth-tagline">The LinkedIn content OS for creators who refuse to sound like everyone else. AI-powered, voice-trained, algorithm-aware.</p>
       <div class="auth-features">
         <span class="auth-pill">Clone My Voice</span>
         <span class="auth-pill">Algo Audit</span>
@@ -291,7 +82,6 @@ body{
         <span class="auth-pill">Sheets Sync</span>
       </div>
     </div>
-
     <div class="auth-testimonial">
       <p class="auth-quote">"I went from posting once a week to daily. The Series Planner had 5 connected posts ready before I even sat down to write. Voicio just gets how I think."</p>
       <div class="auth-quote-author">
@@ -305,800 +95,67 @@ body{
   </div>
 </div>
 
-<!-- RIGHT PANEL -->
 <div class="auth-right">
   <div class="auth-form-wrap">
 
-    <!-- ═══════════════ LOGIN VIEW ═══════════════ -->
-    <div class="view active" id="view-login">
-      <div class="view-title">Welcome back</div>
-      <div class="view-subtitle">New to Voicio? <a href="#" onclick="showView('signup')">Create a free account →</a></div>
-
-      <div class="alert alert-error" id="login-error"></div>
-
-      <!-- Social -->
-      <button class="social-btn" onclick="socialAuth('google')">
-        <svg class="social-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continue with Google
+    <div id="auth-gate">
+      <div class="welcome-title">Welcome to Voicio</div>
+      <div class="welcome-sub">Sign in or create a free account to get started</div>
+      <button class="btn-launch" onclick="netlifyIdentity.open('login')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign in
       </button>
-      <button class="social-btn" onclick="socialAuth('linkedin')">
-        <svg class="social-icon" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        Continue with LinkedIn
-      </button>
-
-      <div class="or-divider">or sign in with email</div>
-
-      <div class="field">
-        <label class="field-label">Email address</label>
-        <div class="field-wrap">
-          <input type="email" class="field-input" id="login-email" placeholder="you@example.com" autocomplete="email">
-        </div>
-        <div class="field-error" id="login-email-err">Please enter a valid email address</div>
-      </div>
-
-      <div class="field">
-        <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
-          Password
-          <a href="#" class="forgot-link" onclick="showView('forgot'); return false;">Forgot password?</a>
-        </label>
-        <div class="field-wrap">
-          <input type="password" class="field-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
-          <button class="field-icon" onclick="togglePassword('login-password', this)" tabindex="-1">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-        <div class="field-error" id="login-pass-err">Password is required</div>
-      </div>
-
-      <button class="btn-submit" id="login-btn" onclick="handleLogin()">
-        <span class="btn-text">Sign in to Voicio</span>
-        <div class="spinner"></div>
-      </button>
-    </div>
-
-    <!-- ═══════════════ SIGNUP VIEW ═══════════════ -->
-    <div class="view" id="view-signup">
-      <button class="back-link" onclick="showView('login')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Back to sign in
-      </button>
-
-      <div class="steps-indicator" id="signup-steps">
-        <div class="step-dot active" id="step-0"></div>
-        <div class="step-dot" id="step-1"></div>
-        <div class="step-dot" id="step-2"></div>
-      </div>
-
-      <!-- Step 0: Account -->
-      <div id="signup-step-0">
-        <div class="view-title">Create your account</div>
-        <div class="view-subtitle">Already have one? <a href="#" onclick="showView('login')">Sign in →</a></div>
-
-        <div class="alert alert-error" id="signup-error"></div>
-
-        <button class="social-btn" onclick="socialAuth('google')">
-          <svg class="social-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Sign up with Google
-        </button>
-
-        <div class="or-divider">or use your email</div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field" style="margin-bottom:0">
-            <label class="field-label">First name</label>
-            <input type="text" class="field-input" id="signup-first" placeholder="Trevor" autocomplete="given-name">
-            <div class="field-error" id="signup-first-err">Required</div>
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label class="field-label">Last name</label>
-            <input type="text" class="field-input" id="signup-last" placeholder="Cusworth" autocomplete="family-name">
-          </div>
-        </div>
-
-        <div class="field mt-3">
-          <label class="field-label">Work email</label>
-          <div class="field-wrap">
-            <input type="email" class="field-input" id="signup-email" placeholder="you@company.com" autocomplete="email">
-          </div>
-          <div class="field-error" id="signup-email-err">Please enter a valid email</div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">Password</label>
-          <div class="field-wrap">
-            <input type="password" class="field-input" id="signup-password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="checkPasswordStrength(this.value)">
-            <button class="field-icon" onclick="togglePassword('signup-password',this)" tabindex="-1">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-          <div class="field-error" id="signup-pass-err">Password must be at least 8 characters</div>
-          <div class="password-strength" id="pass-strength">
-            <div class="strength-bars">
-              <div class="strength-bar" id="sb0"></div>
-              <div class="strength-bar" id="sb1"></div>
-              <div class="strength-bar" id="sb2"></div>
-              <div class="strength-bar" id="sb3"></div>
-            </div>
-            <div class="strength-label" id="strength-label">Weak</div>
-          </div>
-        </div>
-
-        <div class="checkbox-row">
-          <input type="checkbox" id="signup-terms">
-          <label class="checkbox-label" for="signup-terms">
-            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-          </label>
-        </div>
-
-        <button class="btn-submit" id="signup-btn" onclick="handleSignupStep0()">
-          <span class="btn-text">Continue →</span>
-          <div class="spinner"></div>
-        </button>
-      </div>
-
-      <!-- Step 1: Profile -->
-      <div id="signup-step-1" style="display:none">
-        <div class="view-title">Your LinkedIn profile</div>
-        <div class="view-subtitle">Helps Voicio personalize content to your voice and audience</div>
-
-        <div class="field">
-          <label class="field-label">LinkedIn headline</label>
-          <input type="text" class="field-input" id="signup-headline" placeholder="e.g. Founder @ Flatirons Creative | Automation & AI">
-        </div>
-        <div class="field">
-          <label class="field-label">Your industry</label>
-          <select class="field-input" id="signup-industry" style="cursor:pointer">
-            <option value="">— select your industry —</option>
-            <option>Industrial Automation & Engineering</option>
-            <option>SaaS & Software</option>
-            <option>Marketing & Growth</option>
-            <option>Finance & Investing</option>
-            <option>Consulting & Professional Services</option>
-            <option>Healthcare & Life Sciences</option>
-            <option>Executive Leadership</option>
-            <option>Sales & Revenue</option>
-            <option>Product Management</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="field-label">Content goal</label>
-          <select class="field-input" id="signup-goal" style="cursor:pointer">
-            <option value="">— what brings you here? —</option>
-            <option>Build thought leadership</option>
-            <option>Generate inbound leads</option>
-            <option>Grow my audience</option>
-            <option>Share my expertise consistently</option>
-            <option>Support my company brand</option>
-            <option>Land a new role or clients</option>
-          </select>
-        </div>
-
-        <button class="btn-submit" onclick="handleSignupStep1()">
-          <span class="btn-text">Continue →</span>
-          <div class="spinner"></div>
-        </button>
-        <div style="text-align:center;margin-top:12px">
-          <a href="#" onclick="handleSignupStep1()" style="font-size:0.8rem;color:var(--text3);text-decoration:none">Skip for now →</a>
-        </div>
-      </div>
-
-      <!-- Step 2: Plan -->
-      <div id="signup-step-2" style="display:none">
-        <div class="view-title">Choose your plan</div>
-        <div class="view-subtitle">You can always upgrade later. No credit card needed for Free.</div>
-
-        <div class="plan-select" id="plan-select">
-          <div class="plan-option selected" onclick="selectPlan('free', this)">
-            <div class="plan-name">Free</div>
-            <div class="plan-price">$0 / month</div>
-          </div>
-          <div class="plan-option" onclick="selectPlan('creator', this)">
-            <div class="plan-name">Creator</div>
-            <div class="plan-price">$29 / month</div>
-          </div>
-        </div>
-
-        <div id="plan-features" style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:16px;margin-bottom:20px;font-size:0.82rem;color:var(--text2);line-height:1.8">
-          <strong style="color:var(--text);display:block;margin-bottom:6px">Free includes:</strong>
-          ✓ AI post generator (10/mo)<br>
-          ✓ Algorithm Audit<br>
-          ✓ Carousel Designer<br>
-          ✓ Hook Library (20 saves)
-        </div>
-
-        <button class="btn-submit" id="finish-btn" onclick="handleSignupFinish()">
-          <span class="btn-text">Launch Voicio →</span>
-          <div class="spinner"></div>
-        </button>
+      <div class="or-divider">new to voicio</div>
+      <button class="btn-signup" onclick="netlifyIdentity.open('signup')">Create a free account →</button>
+      <div class="trust-row">
+        <span class="trust-item">✓ Free forever plan</span>
+        <span class="trust-item">✓ No credit card</span>
+        <span class="trust-item">✓ Cancel anytime</span>
       </div>
     </div>
 
-    <!-- ═══════════════ FORGOT PASSWORD VIEW ═══════════════ -->
-    <div class="view" id="view-forgot">
-      <button class="back-link" onclick="showView('login')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Back to sign in
-      </button>
-
-      <div id="forgot-form">
-        <div class="view-title">Reset your password</div>
-        <div class="view-subtitle">Enter your email and we'll send you a reset link.</div>
-
-        <div class="alert alert-error" id="forgot-error"></div>
-
-        <div class="field">
-          <label class="field-label">Email address</label>
-          <input type="email" class="field-input" id="forgot-email" placeholder="you@example.com" autocomplete="email">
-          <div class="field-error" id="forgot-email-err">Please enter a valid email</div>
-        </div>
-
-        <button class="btn-submit" onclick="handleForgot()">
-          <span class="btn-text">Send reset link</span>
-          <div class="spinner"></div>
-        </button>
-      </div>
-
-      <div id="forgot-sent" style="display:none;text-align:center;padding:20px 0">
-        <span class="reset-icon">📬</span>
-        <div class="view-title" style="font-size:1.5rem">Check your inbox</div>
-        <div class="view-subtitle">We sent a reset link to <strong id="forgot-sent-email" style="color:var(--text)"></strong>. It expires in 15 minutes.</div>
-        <button class="btn-submit" onclick="showView('login')" style="margin-top:8px">
-          <span class="btn-text">Back to sign in</span>
-          <div class="spinner"></div>
-        </button>
-      </div>
+    <div id="logged-in-state" class="logged-in-state">
+      <div class="user-avatar-big" id="user-initials">—</div>
+      <div class="logged-in-name" id="user-display-name">—</div>
+      <div class="logged-in-email" id="user-display-email">—</div>
+      <button class="btn-go" onclick="window.location.href='index.html'">Launch Voicio →</button>
+      <button class="btn-logout" onclick="netlifyIdentity.logout()">Sign out</button>
     </div>
 
-    <!-- ═══════════════ SUCCESS VIEW ═══════════════ -->
-    <div class="view" id="view-success">
-      <div class="success-screen">
-        <span class="success-icon">🎙️</span>
-        <div class="success-title">You're in.</div>
-        <div class="success-sub" id="success-message">Welcome to Voicio. Your content OS is ready.</div>
-        <button class="btn-submit" onclick="launchApp()">
-          <span class="btn-text">Launch Voicio →</span>
-          <div class="spinner"></div>
-        </button>
-      </div>
-    </div>
-
-  </div><!-- /auth-form-wrap -->
-</div><!-- /auth-right -->
+  </div>
+</div>
 
 <script>
-// ═══════════════ POCKETBASE CONFIG ═══════════════
-var PB_URL = 'https://pb.voicio.app';
-// Use var so pb is truly global
-var pb = new PocketBase(PB_URL);
-window.pb = pb;
+netlifyIdentity.on("init", function(user) {
+  if (user) { showLoggedIn(user); } else { showLoggedOut(); }
+});
+netlifyIdentity.on("login", function(user) {
+  showLoggedIn(user);
+  netlifyIdentity.close();
+  setTimeout(function() { window.location.href = "index.html"; }, 800);
+});
+netlifyIdentity.on("logout", function() { showLoggedOut(); });
 
-// ═══════════════ STATE ═══════════════
-let currentSignupStep = 0;
-let selectedPlanValue = 'free';
-let userData = {};
-
-// ═══════════════ VIEW ROUTING ═══════════════
-function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  clearAlerts();
-  const titles = { login:'Sign In', signup:'Create Account', forgot:'Reset Password', success:'Welcome' };
-  document.title = `Voicio — ${titles[name] || 'Auth'}`;
-}
-
-function clearAlerts() {
-  document.querySelectorAll('.alert').forEach(a => a.classList.remove('show'));
-  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
-  document.querySelectorAll('.field-input').forEach(i => { i.classList.remove('error'); i.classList.remove('success'); });
-}
-
-function showAlert(id, msg) {
-  const el = document.getElementById(id);
-  if (el) { el.textContent = msg; el.classList.add('show'); }
-}
-
-// ═══════════════ VALIDATION ═══════════════
-function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-function validatePassword(p) { return p.length >= 8; }
-function fieldError(inputId, errId, msg) {
-  document.getElementById(inputId)?.classList.add('error');
-  const err = document.getElementById(errId);
-  if (err) { err.textContent = msg; err.classList.add('show'); }
-}
-function fieldOk(id) {
-  const el = document.getElementById(id);
-  if (el) { el.classList.remove('error'); el.classList.add('success'); }
-}
-
-// ═══════════════ PASSWORD TOGGLE ═══════════════
-function togglePassword(id, btn) {
-  const input = document.getElementById(id);
-  const isText = input.type === 'text';
-  input.type = isText ? 'password' : 'text';
-  btn.innerHTML = isText
-    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
-    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-}
-
-// ═══════════════ PASSWORD STRENGTH ═══════════════
-function checkPasswordStrength(pw) {
-  const bar = document.getElementById('pass-strength');
-  bar.classList.toggle('show', pw.length > 0);
-  let score = 0;
-  if (pw.length >= 8) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  const colors = ['#ef4444','#f59e0b','#3b82f6','#10b981'];
-  const labels = ['Weak','Fair','Good','Strong'];
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('sb'+i).style.background = i < score ? colors[score-1] : 'var(--surface3)';
-  }
-  document.getElementById('strength-label').textContent = labels[score-1] || 'Weak';
-  document.getElementById('strength-label').style.color = colors[score-1] || 'var(--text3)';
-}
-
-// ═══════════════ SOCIAL AUTH ═══════════════
-async function socialAuth(provider) {
-  if (!pb) { showAlert('login-error','Still connecting — please try again in a moment.'); return; }
-  try {
-    const authData = await pb.collection('users').authWithOAuth2({ provider });
-    if (!authData.record.firstName && authData.meta?.name) {
-      const parts = authData.meta.name.split(' ');
-      pb.collection('users').update(authData.record.id, {
-        firstName: parts[0] || '', lastName: parts.slice(1).join(' ') || ''
-      }).catch(()=>{});
-    }
-    saveSession(authData.record);
-    completeAuth(`Welcome, ${authData.record.firstName || authData.meta?.name?.split(' ')[0] || 'there'}.`);
-  } catch(e) {
-    showAlert('login-error', e.message || 'OAuth sign-in failed. Please try again.');
-  }
-}
-
-// ═══════════════ LOGIN ═══════════════
-async function handleLogin() {
-  if (!pb) { showAlert('login-error','Still connecting — please try again.'); return; }
-  clearAlerts();
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  let valid = true;
-  if (!validateEmail(email)) { fieldError('login-email','login-email-err','Please enter a valid email address'); valid = false; } else fieldOk('login-email');
-  if (!password) { fieldError('login-password','login-pass-err','Password is required'); valid = false; } else fieldOk('login-password');
-  if (!valid) return;
-  setButtonLoading('login-btn', true);
-  try {
-    const authData = await pb.collection('users').authWithPassword(email, password);
-    saveSession(authData.record);
-    completeAuth(`Welcome back, ${authData.record.firstName || 'there'}.`);
-  } catch(e) {
-    setButtonLoading('login-btn', false);
-    showAlert('login-error', e.status === 400 ? 'Incorrect email or password.' : (e.message || 'Sign in failed.'));
-    document.getElementById('login-password').classList.add('error');
-  }
-}
-
-// ═══════════════ SIGNUP STEPS ═══════════════
-async function handleSignupStep0() {
-  if (!pb) { showAlert('signup-error','Still connecting — please try again.'); return; }
-  clearAlerts();
-  const first = document.getElementById('signup-first').value.trim();
-  const last = document.getElementById('signup-last').value.trim();
-  const email = document.getElementById('signup-email').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const terms = document.getElementById('signup-terms').checked;
-  let valid = true;
-  if (!first) { fieldError('signup-first','signup-first-err','First name is required'); valid = false; } else fieldOk('signup-first');
-  if (!validateEmail(email)) { fieldError('signup-email','signup-email-err','Please enter a valid email'); valid = false; } else fieldOk('signup-email');
-  if (!validatePassword(password)) { fieldError('signup-password','signup-pass-err','Password must be at least 8 characters'); valid = false; } else fieldOk('signup-password');
-  if (!terms) { showAlert('signup-error','Please accept the Terms of Service to continue'); valid = false; }
-  if (!valid) return;
-  setButtonLoading('signup-btn', true);
-  try {
-    const record = await pb.collection('users').create({
-      email, password, passwordConfirm: password,
-      firstName: first, lastName: last, emailVisibility: true
-    });
-    await pb.collection('users').authWithPassword(email, password);
-    userData = { id: record.id, firstName: first, lastName: last, email };
-    pb.collection('users').requestVerification(email).catch(()=>{});
-    setButtonLoading('signup-btn', false);
-    goSignupStep(1);
-  } catch(e) {
-    setButtonLoading('signup-btn', false);
-    const isDupe = JSON.stringify(e).includes('already in use') || JSON.stringify(e).includes('already exists');
-    showAlert('signup-error', isDupe
-      ? 'An account with that email already exists. Try signing in.'
-      : (e.message || 'Could not create account. Please try again.'));
-    if (isDupe) document.getElementById('signup-email').classList.add('error');
-  }
-}
-
-async function handleSignupStep1() {
-  if (pb?.authStore?.model?.id) {
-    pb.collection('users').update(pb.authStore.model.id, {
-      headline: document.getElementById('signup-headline').value.trim(),
-      industry: document.getElementById('signup-industry').value,
-      goal: document.getElementById('signup-goal').value
-    }).catch(()=>{});
-  }
-  userData.headline = document.getElementById('signup-headline').value.trim();
-  userData.industry = document.getElementById('signup-industry').value;
-  userData.goal = document.getElementById('signup-goal').value;
-  goSignupStep(2);
-}
-
-async function handleSignupFinish() {
-  userData.plan = selectedPlanValue;
-  setButtonLoading('finish-btn', true);
-  if (pb?.authStore?.model?.id) {
-    await pb.collection('users').update(pb.authStore.model.id, { plan: selectedPlanValue }).catch(()=>{});
-  }
-  saveSession(pb?.authStore?.model || userData);
-  setButtonLoading('finish-btn', false);
-  completeAuth(`You're all set, ${userData.firstName}. Let's build your voice.`);
-}
-
-function goSignupStep(step) {
-  [0,1,2].forEach(i => {
-    document.getElementById('signup-step-'+i).style.display = i === step ? 'block' : 'none';
-    const dot = document.getElementById('step-'+i);
-    dot.classList.toggle('active', i === step);
-    dot.classList.toggle('done', i < step);
-  });
-  currentSignupStep = step;
-}
-
-// ═══════════════ PLAN SELECTION ═══════════════
-function selectPlan(plan, el) {
-  selectedPlanValue = plan;
-  document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  const features = {
-    free: `<strong style="color:var(--text);display:block;margin-bottom:6px">Free includes:</strong>✓ AI post generator (10/mo)<br>✓ Algorithm Audit<br>✓ Carousel Designer<br>✓ Hook Library (20 saves)`,
-    creator: `<strong style="color:var(--gold);display:block;margin-bottom:6px">Creator includes everything, plus:</strong>✓ Unlimited AI generation<br>✓ Clone My Voice<br>✓ A/B Hook Tester · Series Planner<br>✓ Google Sheets Sync · n8n Webhooks`
-  };
-  document.getElementById('plan-features').innerHTML = features[plan];
-  document.getElementById('finish-btn').querySelector('.btn-text').textContent =
-    plan === 'creator' ? 'Start free trial →' : 'Launch Voicio →';
-}
-
-// ═══════════════ FORGOT PASSWORD ═══════════════
-async function handleForgot() {
-  if (!pb) { showAlert('forgot-error','Still connecting — please try again.'); return; }
-  const email = document.getElementById('forgot-email').value.trim();
-  if (!validateEmail(email)) { fieldError('forgot-email','forgot-email-err','Please enter a valid email'); return; }
-  fieldOk('forgot-email');
-  const form = document.getElementById('forgot-form');
-  form.style.opacity = '0.5'; form.style.pointerEvents = 'none';
-  // PocketBase sends real password reset email — don't reveal if email exists
-  await pb.collection('users').requestPasswordReset(email).catch(()=>{});
-  form.style.display = 'none';
-  document.getElementById('forgot-sent-email').textContent = email;
-  document.getElementById('forgot-sent').style.display = 'block';
-}
-
-// ═══════════════ SESSION ═══════════════
-function saveSession(record) {
-  sessionStorage.setItem('voicio_session', JSON.stringify({
-    id: record?.id || '',
-    email: record?.email || '',
-    name: record?.firstName || record?.name || 'User',
-    plan: record?.plan || 'free',
-    loggedIn: true,
-    token: pb?.authStore?.token || ''
+function showLoggedIn(user) {
+  document.getElementById("auth-gate").style.display = "none";
+  document.getElementById("logged-in-state").style.display = "block";
+  var name = (user.user_metadata && user.user_metadata.full_name) || user.email.split("@")[0];
+  var initials = name.split(" ").map(function(w){return w[0];}).join("").substring(0,2).toUpperCase();
+  document.getElementById("user-initials").textContent = initials;
+  document.getElementById("user-display-name").textContent = name;
+  document.getElementById("user-display-email").textContent = user.email;
+  sessionStorage.setItem("voicio_session", JSON.stringify({
+    id: user.id, email: user.email, name: name,
+    token: user.token ? user.token.access_token : "",
+    plan: "free", loggedIn: true
   }));
 }
 
-// ═══════════════ COMPLETION ═══════════════
-function completeAuth(message) {
-  document.getElementById('success-message').textContent = message;
-  showView('success');
-  setTimeout(() => window.location.href = 'index.html', 1800);
+function showLoggedOut() {
+  document.getElementById("auth-gate").style.display = "block";
+  document.getElementById("logged-in-state").style.display = "none";
+  sessionStorage.removeItem("voicio_session");
 }
-function launchApp() { window.location.href = 'index.html'; }
-
-// ═══════════════ SESSION CHECK ═══════════════
-(function checkSession() {
-  // Check PocketBase auth store first
-  if (pb && pb.authStore.isValid) {
-    saveSession(pb.authStore.model);
-    window.location.href = 'index.html';
-    return;
-  }
-  // Fallback: check sessionStorage
-  try {
-    const s = JSON.parse(sessionStorage.getItem('voicio_session') || '{}');
-    if (s.loggedIn) { window.location.href = 'index.html'; }
-  } catch(e) {}
-})();
-
-// ═══════════════ UI HELPERS ═══════════════
-function setButtonLoading(id, loading) {
-  const btn = document.getElementById(id);
-  if (!btn) return;
-  btn.disabled = loading;
-  btn.classList.toggle('loading', loading);
-}
-
-// Enter key support
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const active = document.querySelector('.view.active');
-  if (!active) return;
-  const id = active.id;
-  if (id === 'view-login') handleLogin();
-  if (id === 'view-forgot') handleForgot();
-  if (id === 'view-signup' && currentSignupStep === 0) handleSignupStep0();
-});
-
-// ═══════════════ VIEW ROUTING ═══════════════
-function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  clearAlerts();
-  // Update page title
-  const titles = { login: 'Sign In', signup: 'Create Account', forgot: 'Reset Password', success: 'Welcome' };
-  document.title = `Voicio — ${titles[name] || 'Auth'}`;
-}
-
-function clearAlerts() {
-  document.querySelectorAll('.alert').forEach(a => a.classList.remove('show'));
-  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
-  document.querySelectorAll('.field-input').forEach(i => { i.classList.remove('error'); i.classList.remove('success'); });
-}
-
-function showAlert(id, msg) {
-  const el = document.getElementById(id);
-  if (el) { el.textContent = msg; el.classList.add('show'); }
-}
-
-// ═══════════════ VALIDATION HELPERS ═══════════════
-function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
-function validatePassword(pw) { return pw.length >= 8; }
-
-function fieldError(inputId, errId, msg) {
-  document.getElementById(inputId)?.classList.add('error');
-  const err = document.getElementById(errId);
-  if (err) { err.textContent = msg; err.classList.add('show'); }
-}
-function fieldOk(inputId) {
-  const el = document.getElementById(inputId);
-  if (el) { el.classList.remove('error'); el.classList.add('success'); }
-}
-
-// ═══════════════ PASSWORD TOGGLE ═══════════════
-function togglePassword(id, btn) {
-  const input = document.getElementById(id);
-  const isText = input.type === 'text';
-  input.type = isText ? 'password' : 'text';
-  btn.innerHTML = isText
-    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
-    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-}
-
-// ═══════════════ PASSWORD STRENGTH ═══════════════
-function checkPasswordStrength(pw) {
-  const bar = document.getElementById('pass-strength');
-  bar.classList.toggle('show', pw.length > 0);
-  let score = 0;
-  if (pw.length >= 8) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-
-  const colors = ['#ef4444','#f59e0b','#3b82f6','#10b981'];
-  const labels = ['Weak','Fair','Good','Strong'];
-  for (let i = 0; i < 4; i++) {
-    const sb = document.getElementById('sb' + i);
-    sb.style.background = i < score ? colors[score - 1] : 'var(--surface3)';
-  }
-  document.getElementById('strength-label').textContent = labels[score - 1] || 'Weak';
-  document.getElementById('strength-label').style.color = colors[score - 1] || 'var(--text3)';
-}
-
-// ═══════════════ SOCIAL AUTH ═══════════════
-function socialAuth(provider) {
-  showLoading(true, provider === 'google' ? 'Connecting to Google...' : 'Connecting to LinkedIn...');
-  // Simulate OAuth redirect
-  setTimeout(() => {
-    showLoading(false);
-    userData = { name: 'Trevor', email: 'trevor@flatirons.co', provider };
-    completeAuth('Welcome back, Trevor.');
-  }, 1800);
-}
-
-// ═══════════════ LOGIN ═══════════════
-function handleLogin() {
-  clearAlerts();
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  let valid = true;
-
-  if (!validateEmail(email)) { fieldError('login-email','login-email-err','Please enter a valid email address'); valid = false; }
-  else fieldOk('login-email');
-
-  if (!password) { fieldError('login-password','login-pass-err','Password is required'); valid = false; }
-  else fieldOk('login-password');
-
-  if (!valid) return;
-
-  setButtonLoading('login-btn', true);
-
-  // Simulate auth — replace with real API call
-  setTimeout(() => {
-    setButtonLoading('login-btn', false);
-    const stored = getStoredUser(email);
-    if (!stored) {
-      showAlert('login-error', 'No account found with that email. Try signing up.');
-      document.getElementById('login-email').classList.add('error');
-      return;
-    }
-    if (stored.password !== password) {
-      showAlert('login-error', 'Incorrect password. Please try again or reset it.');
-      document.getElementById('login-password').classList.add('error');
-      return;
-    }
-    userData = stored;
-    saveSession(stored);
-    completeAuth(`Welcome back, ${stored.firstName || 'there'}.`);
-  }, 1200);
-}
-
-// ═══════════════ SIGNUP STEPS ═══════════════
-function handleSignupStep0() {
-  clearAlerts();
-  const first = document.getElementById('signup-first').value.trim();
-  const email = document.getElementById('signup-email').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const terms = document.getElementById('signup-terms').checked;
-  let valid = true;
-
-  if (!first) { fieldError('signup-first','signup-first-err','First name is required'); valid = false; } else fieldOk('signup-first');
-  if (!validateEmail(email)) { fieldError('signup-email','signup-email-err','Please enter a valid email'); valid = false; } else fieldOk('signup-email');
-  if (!validatePassword(password)) { fieldError('signup-password','signup-pass-err','Password must be at least 8 characters'); valid = false; } else fieldOk('signup-password');
-  if (!terms) { showAlert('signup-error','Please accept the Terms of Service to continue'); valid = false; }
-  if (!valid) return;
-
-  setButtonLoading('signup-btn', true);
-  setTimeout(() => {
-    setButtonLoading('signup-btn', false);
-    userData = {
-      firstName: first,
-      lastName: document.getElementById('signup-last').value.trim(),
-      email, password
-    };
-    goSignupStep(1);
-  }, 800);
-}
-
-function handleSignupStep1() {
-  userData.headline = document.getElementById('signup-headline').value.trim();
-  userData.industry = document.getElementById('signup-industry').value;
-  userData.goal = document.getElementById('signup-goal').value;
-  goSignupStep(2);
-}
-
-function handleSignupFinish() {
-  userData.plan = selectedPlanValue;
-  setButtonLoading('finish-btn', true);
-  setTimeout(() => {
-    setButtonLoading('finish-btn', false);
-    storeUser(userData);
-    saveSession(userData);
-    completeAuth(`You're all set, ${userData.firstName}. Let's build your voice.`);
-  }, 1000);
-}
-
-function goSignupStep(step) {
-  [0,1,2].forEach(i => {
-    document.getElementById('signup-step-' + i).style.display = i === step ? 'block' : 'none';
-    const dot = document.getElementById('step-' + i);
-    dot.classList.toggle('active', i === step);
-    dot.classList.toggle('done', i < step);
-  });
-  currentSignupStep = step;
-}
-
-// ═══════════════ PLAN SELECTION ═══════════════
-function selectPlan(plan, el) {
-  selectedPlanValue = plan;
-  document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  const features = {
-    free: `<strong style="color:var(--text);display:block;margin-bottom:6px">Free includes:</strong>✓ AI post generator (10/mo)<br>✓ Algorithm Audit<br>✓ Carousel Designer<br>✓ Hook Library (20 saves)`,
-    creator: `<strong style="color:var(--gold);display:block;margin-bottom:6px">Creator includes everything, plus:</strong>✓ Unlimited AI generation<br>✓ Clone My Voice<br>✓ A/B Hook Tester · Series Planner<br>✓ Google Sheets Sync · n8n Webhooks`
-  };
-  document.getElementById('plan-features').innerHTML = features[plan];
-  document.getElementById('finish-btn').querySelector('.btn-text').textContent =
-    plan === 'creator' ? 'Start free trial →' : 'Launch Voicio →';
-}
-
-// ═══════════════ FORGOT PASSWORD ═══════════════
-function handleForgot() {
-  const email = document.getElementById('forgot-email').value.trim();
-  if (!validateEmail(email)) { fieldError('forgot-email','forgot-email-err','Please enter a valid email'); return; }
-  fieldOk('forgot-email');
-  // Simulate sending
-  document.getElementById('forgot-form').style.opacity = '0.5';
-  setTimeout(() => {
-    document.getElementById('forgot-form').style.display = 'none';
-    document.getElementById('forgot-sent-email').textContent = email;
-    document.getElementById('forgot-sent').style.display = 'block';
-  }, 900);
-}
-
-// ═══════════════ COMPLETION ═══════════════
-function completeAuth(message) {
-  document.getElementById('success-message').textContent = message;
-  showView('success');
-}
-
-function launchApp() {
-  setButtonLoading('finish-btn', true);
-  window.location.href = 'index.html';
-}
-
-// ═══════════════ STORAGE (local simulation) ═══════════════
-// In production, replace with Supabase / Firebase / your auth backend
-function storeUser(user) {
-  const users = JSON.parse(localStorage.getItem('voicio_users') || '{}');
-  users[user.email] = user;
-  localStorage.setItem('voicio_users', JSON.stringify(users));
-}
-
-function getStoredUser(email) {
-  const users = JSON.parse(localStorage.getItem('voicio_users') || '{}');
-  return users[email] || null;
-}
-
-function saveSession(user) {
-  sessionStorage.setItem('voicio_session', JSON.stringify({
-    email: user.email,
-    name: user.firstName || user.name || 'User',
-    plan: user.plan || 'free',
-    loggedIn: true
-  }));
-}
-
-// ═══════════════ UI HELPERS ═══════════════
-function setButtonLoading(id, loading) {
-  const btn = document.getElementById(id);
-  if (!btn) return;
-  btn.disabled = loading;
-  btn.classList.toggle('loading', loading);
-}
-
-function showLoading(show, msg) {
-  // Simple global loading for social auth
-}
-
-// ═══════════════ SESSION CHECK ═══════════════
-// If already logged in, redirect to app
-(function checkSession() {
-  const session = sessionStorage.getItem('voicio_session');
-  if (session) {
-    try {
-      const s = JSON.parse(session);
-      if (s.loggedIn) window.location.href = 'index.html';
-    } catch(e) {}
-  }
-})();
-
-// Enter key support
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const active = document.querySelector('.view.active');
-  if (!active) return;
-  const id = active.id;
-  if (id === 'view-login') handleLogin();
-  if (id === 'view-forgot') handleForgot();
-  if (id === 'view-signup' && currentSignupStep === 0) handleSignupStep0();
-});
-
-// Smooth transitions between steps
-const mt3 = { marginTop: '12px' };
 </script>
 </body>
 </html>
