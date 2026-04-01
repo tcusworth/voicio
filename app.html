@@ -43,8 +43,8 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 .badge{background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);color:var(--accent2);font-size:0.68rem;font-weight:600;padding:3px 9px;border-radius:20px;font-family:var(--font-mono);letter-spacing:0.05em;text-transform:uppercase}
 .header-actions{display:flex;align-items:center;gap:8px}
 /* LAYOUT */
-.main{display:flex;height:calc(100vh - 57px)}
-.sidebar{width:220px;min-width:220px;border-right:1px solid var(--border);padding:16px 0;background:rgba(13,17,23,0.6);overflow-y:auto;height:100%}
+.main{display:flex;flex:1}
+.sidebar{width:220px;min-width:220px;border-right:1px solid var(--border);padding:16px 0;background:rgba(13,17,23,0.6)}
 .sidebar-section{margin-bottom:24px}
 .sidebar-label{font-size:0.65rem;font-weight:600;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;padding:0 16px 6px;font-family:var(--font-mono)}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:0.84rem;font-weight:400;color:var(--muted2);cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all 0.15s;position:relative;font-family:var(--font-body)}
@@ -233,7 +233,6 @@ select option{background:var(--surface2)}
 .stat-value{font-family:var(--font-display);font-size:2rem;font-weight:800;letter-spacing:-0.03em;line-height:1}
 .stat-label{font-size:0.75rem;color:var(--muted2);margin-top:4px}
 </style>
-<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","vxoylw2pmc");</script>
 </head>
 <body>
 <div class="app">
@@ -1187,6 +1186,27 @@ select option{background:var(--surface2)}
   </div>
 </div>
 
+</div><!-- /content -->
+</div><!-- /main -->
+
+<!-- SHEETS CONFIG MODAL -->
+<div id="sheets-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:480px;max-width:90vw">
+    <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-bottom:6px">Connect Google Sheets</div>
+    <div style="font-size:0.8rem;color:var(--muted2);margin-bottom:20px;line-height:1.6">Every archived post will be appended as a row to your spreadsheet.<br><a href="https://console.cloud.google.com/apis/library/sheets.googleapis.com" target="_blank" style="color:var(--accent2)">Enable Sheets API →</a> then create an API key.</div>
+    <div class="flex-col gap-3 mb-4">
+      <div class="form-group"><label class="label">Google API Key</label><input type="password" id="cfg-api-key" placeholder="AIza..."></div>
+      <div class="form-group"><label class="label">Spreadsheet ID</label><input type="text" id="cfg-sheet-id" placeholder="Found in your Sheets URL: /spreadsheets/d/ID/edit"></div>
+    </div>
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px;font-size:0.75rem;color:var(--muted2);margin-bottom:18px">
+      <strong style="color:var(--text)">Columns written:</strong> Timestamp · Format · Tone · Full Post Text · Score · Source
+    </div>
+    <div class="flex gap-3">
+      <button class="btn btn-primary" style="flex:1" onclick="saveSheetsConfig()"><i data-lucide="save"></i> Save & Connect</button>
+      <button class="btn btn-ghost" onclick="closeSheetsConfig()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- IMAGE GENERATOR -->
 <div class="panel" id="panel-imagegen">
@@ -1313,30 +1333,6 @@ select option{background:var(--surface2)}
   </div>
 </div>
 
-
-</div><!-- /content -->
-</div><!-- /main -->
-
-<!-- SHEETS CONFIG MODAL -->
-<div id="sheets-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
-  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:480px;max-width:90vw">
-    <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-bottom:6px">Connect Google Sheets</div>
-    <div style="font-size:0.8rem;color:var(--muted2);margin-bottom:20px;line-height:1.6">Every archived post will be appended as a row to your spreadsheet.<br><a href="https://console.cloud.google.com/apis/library/sheets.googleapis.com" target="_blank" style="color:var(--accent2)">Enable Sheets API →</a> then create an API key.</div>
-    <div class="flex-col gap-3 mb-4">
-      <div class="form-group"><label class="label">Google API Key</label><input type="password" id="cfg-api-key" placeholder="AIza..."></div>
-      <div class="form-group"><label class="label">Spreadsheet ID</label><input type="text" id="cfg-sheet-id" placeholder="Found in your Sheets URL: /spreadsheets/d/ID/edit"></div>
-    </div>
-    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px;font-size:0.75rem;color:var(--muted2);margin-bottom:18px">
-      <strong style="color:var(--text)">Columns written:</strong> Timestamp · Format · Tone · Full Post Text · Score · Source
-    </div>
-    <div class="flex gap-3">
-      <button class="btn btn-primary" style="flex:1" onclick="saveSheetsConfig()"><i data-lucide="save"></i> Save & Connect</button>
-      <button class="btn btn-ghost" onclick="closeSheetsConfig()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-
 </div><!-- /app -->
 
 <script>
@@ -1433,8 +1429,6 @@ async function loadPostCounter() {
     }
   } catch(e) {}
 }
-
-async function checkPostLimit() {
   const user = window._voicioSession;
   const plan = user?.plan || 'free';
   if (plan !== 'free') return true; // paid plans unlimited
@@ -2655,6 +2649,11 @@ function initApp(){
 
   loadPostCounter();
 
+  // Show onboarding for new users
+  if (!localStorage.getItem('voicio_onboarded')) {
+    setTimeout(openOnboarding, 800);
+  }
+
   // Set user avatar initials from session
   const sess = window._voicioSession;
   if (sess) {
@@ -2713,5 +2712,237 @@ if (new URLSearchParams(window.location.search).get('upgraded') === 'true') {
 }
 document.addEventListener('DOMContentLoaded',initApp);
 </script>
+<!-- ONBOARDING MODAL -->
+<div id="onboarding-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:40px;width:560px;max-width:90vw">
+
+    <!-- Progress -->
+    <div style="display:flex;gap:6px;margin-bottom:32px">
+      <div class="ob-step-dot active" id="ob-dot-0"></div>
+      <div class="ob-step-dot" id="ob-dot-1"></div>
+      <div class="ob-step-dot" id="ob-dot-2"></div>
+    </div>
+
+    <!-- Step 0: Welcome + LinkedIn -->
+    <div class="ob-step active" id="ob-step-0">
+      <div style="font-size:1.8rem;margin-bottom:8px">👋</div>
+      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Welcome to Voicio</div>
+      <div style="font-size:0.875rem;color:var(--muted2);margin-bottom:28px">Let's set up your content OS in 60 seconds.</div>
+      <div class="form-group mb-3">
+        <label class="label">Your LinkedIn Profile URL</label>
+        <input type="url" id="ob-linkedin" placeholder="https://linkedin.com/in/yourname" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:0.9rem;border-radius:8px;padding:12px 14px;outline:none">
+      </div>
+      <div class="form-group mb-3">
+        <label class="label">Your Headline / Role</label>
+        <input type="text" id="ob-headline" placeholder="e.g. Founder at Flatirons Creative Studio" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:0.9rem;border-radius:8px;padding:12px 14px;outline:none">
+      </div>
+      <div class="form-group">
+        <label class="label">Your Industry</label>
+        <select id="ob-industry" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:0.9rem;border-radius:8px;padding:12px 14px;outline:none">
+          <option value="">Select your industry...</option>
+          <option>Industrial Automation & Process Control</option>
+          <option>SaaS & Software</option>
+          <option>Marketing & Growth</option>
+          <option>Consulting & Professional Services</option>
+          <option>Finance & Investing</option>
+          <option>Healthcare & Biotech</option>
+          <option>Real Estate</option>
+          <option>E-commerce & Retail</option>
+          <option>Education & Coaching</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Step 1: Content Pillars -->
+    <div class="ob-step" id="ob-step-1">
+      <div style="font-size:1.8rem;margin-bottom:8px">🎯</div>
+      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Pick your content pillars</div>
+      <div style="font-size:0.875rem;color:var(--muted2);margin-bottom:24px">Choose 3 topics you want to be known for on LinkedIn.</div>
+      <div id="ob-pillars-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${['Leadership & Management','Industry Insights','Personal Stories','Technical Expertise','Entrepreneurship','Career Growth','Innovation & AI','Sales & Revenue','Team Building','Productivity','Customer Success','Future of Work'].map(p=>`
+        <div class="ob-pillar-btn" onclick="toggleObPillar(this,'${p}')" style="padding:10px 14px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:0.82rem;transition:all 0.15s;background:var(--surface2)">${p}</div>`).join('')}
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted2);margin-top:12px;font-family:var(--font-mono)" id="ob-pillar-count">0 / 3 selected</div>
+    </div>
+
+    <!-- Step 2: Goal & Tone -->
+    <div class="ob-step" id="ob-step-2">
+      <div style="font-size:1.8rem;margin-bottom:8px">🚀</div>
+      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Set your posting goal</div>
+      <div style="font-size:0.875rem;color:var(--muted2);margin-bottom:24px">This helps Voicio tailor suggestions for your schedule.</div>
+      <div class="form-group mb-4">
+        <label class="label">Posts per week</label>
+        <div style="display:flex;gap:8px">
+          ${[1,2,3,5,7].map(n=>`<button class="ob-freq-btn" onclick="selectObFreq(this,${n})" style="flex:1;padding:12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--muted2);font-size:0.85rem;cursor:pointer;transition:all 0.15s">${n}x</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-group mb-4">
+        <label class="label">Primary goal</label>
+        <select id="ob-goal" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:0.9rem;border-radius:8px;padding:12px 14px;outline:none">
+          <option value="brand">Build personal brand</option>
+          <option value="leads">Generate leads & clients</option>
+          <option value="thought-leader">Establish thought leadership</option>
+          <option value="hiring">Attract talent</option>
+          <option value="network">Grow network</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="label">Default writing tone</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="ob-tone-btn active" onclick="selectObTone(this,'thought-leader')" style="padding:10px 14px;border:1px solid var(--accent);border-radius:8px;cursor:pointer;font-size:0.82rem;transition:all 0.15s;background:rgba(59,130,246,0.1);color:var(--accent2)">💡 Thought Leader</div>
+          <div class="ob-tone-btn" onclick="selectObTone(this,'storyteller')" style="padding:10px 14px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:0.82rem;transition:all 0.15s;background:var(--surface2)">📖 Storyteller</div>
+          <div class="ob-tone-btn" onclick="selectObTone(this,'technical')" style="padding:10px 14px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:0.82rem;transition:all 0.15s;background:var(--surface2)">🔬 Technical</div>
+          <div class="ob-tone-btn" onclick="selectObTone(this,'controversial')" style="padding:10px 14px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:0.82rem;transition:all 0.15s;background:var(--surface2)">🔥 Controversial</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav buttons -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:32px">
+      <button id="ob-back-btn" onclick="obBack()" style="display:none;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:0.875rem;font-family:var(--font-body)">← Back</button>
+      <div style="flex:1"></div>
+      <button id="ob-next-btn" class="btn btn-primary" onclick="obNext()" style="min-width:140px">Continue →</button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.ob-step{display:none}.ob-step.active{display:block}
+.ob-step-dot{height:4px;flex:1;border-radius:2px;background:var(--border2);transition:background 0.3s}
+.ob-step-dot.active{background:var(--accent)}
+.ob-pillar-btn.selected{border-color:var(--accent);background:rgba(59,130,246,0.1);color:var(--accent2)}
+.ob-freq-btn.selected{border-color:var(--accent);background:rgba(59,130,246,0.1);color:var(--accent2)}
+.ob-tone-btn.active{border-color:var(--accent);background:rgba(59,130,246,0.1);color:var(--accent2)}
+</style>
+
+<script>
+// ========== ONBOARDING ==========
+let obStep = 0;
+let obPillars = [];
+let obFreq = 3;
+let obTone = 'thought-leader';
+
+function openOnboarding() {
+  document.getElementById('onboarding-modal').style.display = 'flex';
+}
+
+function obBack() {
+  obStep--;
+  updateObStep();
+}
+
+function obNext() {
+  if (obStep === 2) {
+    finishOnboarding();
+    return;
+  }
+  obStep++;
+  updateObStep();
+}
+
+function updateObStep() {
+  document.querySelectorAll('.ob-step').forEach((s,i) => s.classList.toggle('active', i === obStep));
+  document.querySelectorAll('.ob-step-dot').forEach((d,i) => d.classList.toggle('active', i <= obStep));
+  document.getElementById('ob-back-btn').style.display = obStep > 0 ? 'block' : 'none';
+  document.getElementById('ob-next-btn').textContent = obStep === 2 ? 'Get started →' : 'Continue →';
+}
+
+function toggleObPillar(el, pillar) {
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    obPillars = obPillars.filter(p => p !== pillar);
+  } else {
+    if (obPillars.length >= 3) { showToast('Pick up to 3 pillars', 'warn'); return; }
+    el.classList.add('selected');
+    obPillars.push(pillar);
+  }
+  document.getElementById('ob-pillar-count').textContent = obPillars.length + ' / 3 selected';
+}
+
+function selectObFreq(el, n) {
+  document.querySelectorAll('.ob-freq-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  obFreq = n;
+}
+
+function selectObTone(el, tone) {
+  document.querySelectorAll('.ob-tone-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.borderColor = 'var(--border2)';
+    b.style.background = 'var(--surface2)';
+    b.style.color = 'var(--muted2)';
+  });
+  el.classList.add('active');
+  el.style.borderColor = 'var(--accent)';
+  el.style.background = 'rgba(59,130,246,0.1)';
+  el.style.color = 'var(--accent2)';
+  obTone = tone;
+}
+
+function finishOnboarding() {
+  const linkedin = document.getElementById('ob-linkedin').value.trim();
+  const headline = document.getElementById('ob-headline').value.trim();
+  const industry = document.getElementById('ob-industry').value;
+  const goal = document.getElementById('ob-goal').value;
+
+  // Save to localStorage for use in app
+  localStorage.setItem('voicio_onboarded', '1');
+  localStorage.setItem('voicio_profile', JSON.stringify({ linkedin, headline, industry, goal, freq: obFreq, tone: obTone }));
+
+  // Pre-fill content pillars
+  if (obPillars.length) {
+    const existing = JSON.parse(localStorage.getItem('voicio_pillars') || '[]');
+    if (!existing.length) {
+      const colors = ['#3b82f6','#8b5cf6','#10b981'];
+      const newPillars = obPillars.map((p,i) => ({ id: Date.now()+i, name: p, color: colors[i] || '#3b82f6', description: '' }));
+      localStorage.setItem('voicio_pillars', JSON.stringify(newPillars));
+    }
+  }
+
+  // Set default tone
+  currentTone = obTone;
+  document.querySelectorAll('.tone-card').forEach(c => c.classList.remove('selected'));
+  const toneEl = document.querySelector('[data-tone="'+obTone+'"]') || document.querySelector('.tone-card');
+  if (toneEl) toneEl.classList.add('selected');
+
+  // Pre-fill industry in generate panel
+  const industryInput = document.getElementById('industry-input');
+  if (industryInput && industry) industryInput.value = industry;
+
+  // Close modal
+  document.getElementById('onboarding-modal').style.display = 'none';
+
+  // Trigger welcome email via PocketBase hook
+  triggerWelcomeEmail();
+
+  renderPillars();
+  showToast('Welcome to Voicio! Your workspace is ready. 🎉', 'success');
+}
+
+async function triggerWelcomeEmail() {
+  try {
+    const user = window._voicioSession;
+    if (!user?.id) return;
+    const token = localStorage.getItem('voicio_token');
+
+    // Update onboarded flag in PocketBase
+    await fetch('https://pb.voicio.app/api/collections/users/records/' + user.id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ onboarded: true })
+    });
+
+    // Send welcome email
+    await fetch('/.netlify/functions/welcome-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email, name: user.name, sequence: 'welcome' })
+    });
+  } catch(e) {}
+}
+</script>
+
 </body>
 </html>
