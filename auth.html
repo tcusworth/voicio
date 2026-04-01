@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.3/dist/pocketbase.umd.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
@@ -567,20 +568,28 @@ body{
 
 <script>
 // ═══════════════ POCKETBASE CONFIG ═══════════════
-const PB_URL = 'https://api.voicio.app';
+const PB_URL = 'https://pb.voicio.app';
 let pb;
 
-// Load PocketBase SDK
-const pbScript = document.createElement('script');
-pbScript.src = 'https://cdn.jsdelivr.net/npm/pocketbase@0.21.3/dist/pocketbase.umd.js';
-document.head.appendChild(pbScript);
-pbScript.onload = () => {
-  pb = new PocketBase(PB_URL);
-  if (pb.authStore.isValid) {
-    saveSession(pb.authStore.model);
-    window.location.href = 'index.html';
+// Initialize PocketBase — SDK already loaded via script tag in head
+function initPocketBase() {
+  try {
+    pb = new PocketBase(PB_URL);
+    if (pb.authStore.isValid) {
+      saveSession(pb.authStore.model);
+      window.location.href = 'index.html';
+    }
+  } catch(e) {
+    console.error('PocketBase init error:', e);
   }
-};
+}
+
+// Init immediately if PocketBase is available, otherwise wait
+if (typeof PocketBase !== 'undefined') {
+  initPocketBase();
+} else {
+  document.addEventListener('DOMContentLoaded', initPocketBase);
+}
 
 // ═══════════════ STATE ═══════════════
 let currentSignupStep = 0;
