@@ -337,6 +337,8 @@ select option{background:var(--surface2)}
     <div class="sidebar-label">System</div>
     <button class="nav-item" onclick="navigate('calendar')" id="nav-calendar"><i data-lucide="calendar"></i> Calendar</button>
     <button class="nav-item" onclick="navigate('history')" id="nav-history"><i data-lucide="archive"></i> Archive</button>
+    <button class="nav-item" onclick="navigate('imagegen')" id="nav-imagegen"><i data-lucide="image"></i> Image Gen</button>
+    <button class="nav-item" onclick="navigate('bulkupload')" id="nav-bulkupload"><i data-lucide="upload"></i> Bulk Upload</button>
     <button class="nav-item" onclick="navigate('brand')" id="nav-brand"><i data-lucide="palette"></i> Brand Kit</button>
   </div>
 </nav>
@@ -1206,6 +1208,131 @@ select option{background:var(--surface2)}
   </div>
 </div>
 
+<!-- IMAGE GENERATOR -->
+<div class="panel" id="panel-imagegen">
+  <div class="panel-header">
+    <div class="panel-title">Image <span>Generator</span></div>
+    <div class="panel-subtitle">Generate LinkedIn-optimized images using Nana Banana 2 via Pollinations.ai — no API key needed</div>
+  </div>
+  <div class="grid-2 gap-4">
+    <div class="flex-col gap-4">
+      <div class="card">
+        <div class="card-title"><i data-lucide="wand-2"></i> Image Settings</div>
+        <div class="form-group mb-3">
+          <label class="label">Topic / Post Content</label>
+          <textarea id="img-topic" placeholder="Describe what the image should convey, or paste your LinkedIn post to auto-generate a relevant prompt..." style="min-height:100px"></textarea>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="form-group" style="flex:1">
+            <label class="label">Style</label>
+            <select id="img-style">
+              <option value="professional">Professional / Corporate</option>
+              <option value="minimal">Minimal / Clean</option>
+              <option value="bold">Bold / Graphic</option>
+              <option value="photo">Photorealistic</option>
+              <option value="abstract">Abstract / Artistic</option>
+              <option value="infographic">Infographic Style</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="label">Format</label>
+            <select id="img-format">
+              <option value="square">Square (1:1)</option>
+              <option value="landscape">Landscape (16:9)</option>
+              <option value="portrait">Portrait (4:5)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group mb-3">
+          <label class="label">Color Theme</label>
+          <select id="img-color">
+            <option value="dark blue">Dark Blue (matches Voicio)</option>
+            <option value="white minimalist">White Minimalist</option>
+            <option value="black and gold">Black & Gold</option>
+            <option value="vibrant colorful">Vibrant & Colorful</option>
+            <option value="monochrome">Monochrome</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="generateImage()">
+          <i data-lucide="image"></i> Generate Image
+        </button>
+      </div>
+      <div class="card" id="img-prompt-card" style="display:none">
+        <div class="card-title"><i data-lucide="terminal"></i> Generated Prompt</div>
+        <div id="img-prompt-text" style="font-size:0.8rem;color:var(--muted2);line-height:1.6;font-family:var(--font-mono)"></div>
+        <button class="btn btn-secondary btn-sm mt-3" onclick="copyImagePrompt()"><i data-lucide="copy"></i> Copy for Midjourney/DALL-E</button>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px">
+      <div id="img-placeholder" style="text-align:center;color:var(--muted)">
+        <i data-lucide="image" style="width:48px;height:48px;margin-bottom:12px;opacity:0.3"></i>
+        <div style="font-size:0.85rem">Your generated image will appear here</div>
+      </div>
+      <div id="img-loading" style="display:none;text-align:center">
+        <div class="spinner" style="width:32px;height:32px;margin:0 auto 12px"></div>
+        <div style="font-size:0.85rem;color:var(--muted2)">Generating with Nana Banana 2...</div>
+      </div>
+      <img id="img-result" style="display:none;max-width:100%;border-radius:var(--radius);box-shadow:0 4px 24px rgba(0,0,0,0.4)" alt="Generated image">
+      <div id="img-actions" style="display:none;margin-top:16px;display:none;gap:10px">
+        <a id="img-download" class="btn btn-primary" download="voicio-image.jpg" target="_blank">
+          <i data-lucide="download"></i> Download
+        </a>
+        <button class="btn btn-secondary" onclick="generateImage()">
+          <i data-lucide="refresh-cw"></i> Regenerate
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BULK UPLOAD -->
+<div class="panel" id="panel-bulkupload">
+  <div class="panel-header">
+    <div class="panel-title">Bulk Post <span>Upload</span></div>
+    <div class="panel-subtitle">Upload a CSV to schedule multiple posts at once</div>
+  </div>
+  <div class="grid-2 gap-4">
+    <div class="flex-col gap-4">
+      <div class="card">
+        <div class="card-title"><i data-lucide="file-text"></i> CSV Format</div>
+        <div style="font-size:0.82rem;color:var(--muted2);margin-bottom:16px;line-height:1.7">
+          Your CSV should have these columns in order:
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;font-family:var(--font-mono);font-size:0.72rem;color:var(--accent2);line-height:2;margin-bottom:16px">
+          content, date, time, format, tone, status
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted2);line-height:1.8;margin-bottom:16px">
+          <strong style="color:var(--text)">date:</strong> YYYY-MM-DD (e.g. 2026-04-15)<br>
+          <strong style="color:var(--text)">time:</strong> HH:MM (e.g. 08:00)<br>
+          <strong style="color:var(--text)">format:</strong> post / carousel / thread<br>
+          <strong style="color:var(--text)">tone:</strong> thought-leader / storyteller / technical / controversial<br>
+          <strong style="color:var(--text)">status:</strong> scheduled / draft
+        </div>
+        <button class="btn btn-secondary btn-full mb-3" onclick="downloadCSVTemplate()">
+          <i data-lucide="download"></i> Download Template CSV
+        </button>
+        <div class="form-group">
+          <label class="label">Upload CSV File</label>
+          <input type="file" id="csv-upload" accept=".csv" onchange="handleCSVUpload(event)" style="width:100%;padding:10px;background:var(--surface2);border:1px dashed var(--border2);border-radius:8px;color:var(--text);font-size:0.85rem;cursor:pointer">
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i data-lucide="list-checks"></i> Preview</div>
+      <div id="csv-preview" style="min-height:300px">
+        <div style="text-align:center;padding:40px;color:var(--muted);font-size:0.85rem">
+          Upload a CSV to preview posts before importing
+        </div>
+      </div>
+      <div id="csv-import-btn" style="display:none;margin-top:16px">
+        <button class="btn btn-primary btn-full" onclick="importCSVPosts()">
+          <i data-lucide="calendar-plus"></i> Import <span id="csv-count">0</span> Posts to Calendar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <script>
@@ -1302,8 +1429,6 @@ async function loadPostCounter() {
     }
   } catch(e) {}
 }
-
-async function checkPostLimit() {
   const user = window._voicioSession;
   const plan = user?.plan || 'free';
   if (plan !== 'free') return true; // paid plans unlimited
@@ -1842,7 +1967,182 @@ function renderSavedPrompts(){
   if(typeof lucide!=='undefined') lucide.createIcons();
 }
 
-// ========== SCHEDULER ==========
+// ========== IMAGE GENERATOR ==========
+let lastImagePrompt = '';
+
+async function generateImage() {
+  const topic = document.getElementById('img-topic').value.trim();
+  if (!topic) { showToast('Enter a topic or post content first', 'warn'); return; }
+
+  const style = document.getElementById('img-style').value;
+  const format = document.getElementById('img-format').value;
+  const color = document.getElementById('img-color').value;
+
+  // Show loading
+  document.getElementById('img-placeholder').style.display = 'none';
+  document.getElementById('img-loading').style.display = 'block';
+  document.getElementById('img-result').style.display = 'none';
+  document.getElementById('img-actions').style.display = 'none';
+
+  // Generate prompt via Claude
+  const promptRequest = `Create a detailed image generation prompt for a LinkedIn post image.
+Topic/Content: ${topic}
+Style: ${style}
+Color theme: ${color}
+Format: ${format}
+
+Write ONLY the image prompt (2-3 sentences). Make it specific, visual, and professional. No hashtags or meta-commentary.`;
+
+  try {
+    const r = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: promptRequest, max_tokens: 200 })
+    });
+    const d = await r.json();
+    lastImagePrompt = d.content?.[0]?.text || topic;
+
+    // Show prompt
+    document.getElementById('img-prompt-text').textContent = lastImagePrompt;
+    document.getElementById('img-prompt-card').style.display = 'block';
+
+    // Determine dimensions
+    const dims = { square: '1024x1024', landscape: '1792x1024', portrait: '1024x1280' };
+    const dim = dims[format] || '1024x1024';
+    const [w, h] = dim.split('x');
+
+    // Generate image via Pollinations.ai with nana-banana-2
+    const encodedPrompt = encodeURIComponent(lastImagePrompt);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=nana-banana-2&width=${w}&height=${h}&nologo=true&enhance=true&seed=${Math.floor(Math.random()*99999)}`;
+
+    const img = document.getElementById('img-result');
+    img.onload = function() {
+      document.getElementById('img-loading').style.display = 'none';
+      img.style.display = 'block';
+      const actions = document.getElementById('img-actions');
+      actions.style.display = 'flex';
+      document.getElementById('img-download').href = imageUrl;
+      showToast('Image generated ✓', 'success');
+    };
+    img.onerror = function() {
+      document.getElementById('img-loading').style.display = 'none';
+      document.getElementById('img-placeholder').style.display = 'block';
+      showToast('Image generation failed. Try again.', 'error');
+    };
+    img.src = imageUrl;
+
+  } catch(e) {
+    document.getElementById('img-loading').style.display = 'none';
+    document.getElementById('img-placeholder').style.display = 'block';
+    showToast('Error generating image', 'error');
+  }
+}
+
+function copyImagePrompt() {
+  navigator.clipboard.writeText(lastImagePrompt).then(() => showToast('Prompt copied ✓', 'success'));
+}
+
+// ========== BULK CSV UPLOAD ==========
+let csvPosts = [];
+
+function downloadCSVTemplate() {
+  const header = 'content,date,time,format,tone,status';
+  const example1 = '"Why every industrial engineer needs to understand OPA in 2026 — and why most are missing it entirely.",2026-04-15,08:00,post,thought-leader,scheduled';
+  const example2 = '"5 metrics every plant manager should track: OEE, MTTR, alarm flood rate, loop health, energy intensity.",2026-04-17,12:00,carousel,technical,draft';
+  const csv = [header, example1, example2].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'voicio-bulk-upload-template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function handleCSVUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    parseCSV(text);
+  };
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { showToast('CSV must have a header row and at least one post', 'warn'); return; }
+
+  // Skip header
+  const rows = lines.slice(1);
+  csvPosts = [];
+  const errors = [];
+
+  rows.forEach(function(line, i) {
+    if (!line.trim()) return;
+    // Handle quoted fields
+    const cols = line.match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+    const clean = cols.map(c => c.replace(/^"|"$/g, '').trim());
+    const [content, date, time, format, tone, status] = clean;
+
+    if (!content || !date) { errors.push('Row ' + (i+2) + ': missing content or date'); return; }
+
+    csvPosts.push({
+      id: Date.now().toString() + i,
+      content: content,
+      date: date,
+      time: time || '08:00',
+      format: format || 'post',
+      tone: tone || 'thought-leader',
+      status: status || 'scheduled',
+      created: new Date().toISOString()
+    });
+  });
+
+  renderCSVPreview(errors);
+}
+
+function renderCSVPreview(errors) {
+  const preview = document.getElementById('csv-preview');
+  const importBtn = document.getElementById('csv-import-btn');
+  const countEl = document.getElementById('csv-count');
+
+  if (!csvPosts.length) {
+    preview.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);font-size:0.85rem">No valid posts found. Check your CSV format.</div>';
+    importBtn.style.display = 'none';
+    return;
+  }
+
+  let html = '';
+  if (errors.length) {
+    html += `<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.75rem;color:#fca5a5">${errors.join('<br>')}</div>`;
+  }
+
+  html += csvPosts.map(function(p) {
+    return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:8px">
+      <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--accent2);margin-bottom:4px">${p.date} ${p.time} · ${p.format} · ${p.tone}</div>
+      <div style="font-size:0.8rem;line-height:1.5;color:var(--text2)">${p.content.substring(0, 100)}${p.content.length > 100 ? '...' : ''}</div>
+      <span style="font-size:0.65rem;padding:2px 8px;border-radius:12px;background:rgba(59,130,246,0.12);color:var(--accent2);margin-top:6px;display:inline-block">${p.status}</span>
+    </div>`;
+  }).join('');
+
+  preview.innerHTML = html;
+  countEl.textContent = csvPosts.length;
+  importBtn.style.display = 'block';
+}
+
+function importCSVPosts() {
+  if (!csvPosts.length) return;
+  scheduledPosts = scheduledPosts.concat(csvPosts);
+  saveScheduledPosts();
+  showToast(csvPosts.length + ' posts imported to calendar ✓', 'success');
+  csvPosts = [];
+  document.getElementById('csv-preview').innerHTML = '<div style="text-align:center;padding:40px;color:var(--green);font-size:0.85rem">✓ Posts imported successfully! View them in the Calendar panel.</div>';
+  document.getElementById('csv-import-btn').style.display = 'none';
+  document.getElementById('csv-upload').value = '';
+  setTimeout(() => navigate('calendar'), 1500);
+}
 let scheduledPosts = JSON.parse(localStorage.getItem('voicio_scheduled') || '[]');
 let calViewYear, calViewMonth;
 let draggedPostId = null;
