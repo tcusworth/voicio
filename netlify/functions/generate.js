@@ -4,7 +4,10 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { prompt, max_tokens } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    // Support both {prompt, max_tokens} and {messages, max_tokens}
+    const messages = body.messages || [{ role: 'user', content: body.prompt }];
+    const max_tokens = body.max_tokens || 1000;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -15,8 +18,8 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: max_tokens || 1000,
-        messages: [{ role: 'user', content: prompt }]
+        max_tokens,
+        messages
       })
     });
 
