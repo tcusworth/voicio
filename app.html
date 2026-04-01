@@ -7,16 +7,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
 <script>
-// Auth guard — check Netlify Identity session
+// Auth guard — check localStorage token set by auth.html
 (function(){
+  var token = localStorage.getItem('voicio_token');
+  if (!token) { window.location.replace('/auth.html'); return; }
   try {
-    const s = JSON.parse(sessionStorage.getItem('voicio_session') || '{}');
-    if (!s.loggedIn) { window.location.href = 'auth.html'; return; }
-    window._voicioSession = s;
-  } catch(e) { window.location.href = 'auth.html'; }
+    var user = JSON.parse(localStorage.getItem('voicio_user') || '{}');
+    window._voicioSession = { loggedIn: true, token: token, email: user.email, name: user.name, plan: user.plan || 'free', id: user.id };
+  } catch(e) { window.location.replace('/auth.html'); }
 })();
 </script>
 <style>
@@ -2250,12 +2250,11 @@ function initApp(){
 }
 
 function logout() {
+  localStorage.setItem('voicio_logout', '1');
+  localStorage.removeItem('voicio_token');
+  localStorage.removeItem('voicio_user');
   sessionStorage.removeItem('voicio_session');
-  sessionStorage.setItem('from_logout', '1');
-  if (typeof netlifyIdentity !== 'undefined') {
-    netlifyIdentity.logout();
-  }
-  window.location.href = 'auth.html';
+  window.location.replace('/auth.html');
 }
 document.addEventListener('DOMContentLoaded',initApp);
 </script>
