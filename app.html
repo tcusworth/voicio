@@ -2251,6 +2251,10 @@ function initApp(){
 
 function logout() {
   sessionStorage.removeItem('voicio_session');
+  sessionStorage.setItem('from_logout', '1');
+  if (typeof netlifyIdentity !== 'undefined') {
+    netlifyIdentity.logout();
+  }
   window.location.href = 'auth.html';
 }
 document.addEventListener('DOMContentLoaded',initApp);

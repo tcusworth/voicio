@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"><\/script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
@@ -127,7 +127,8 @@ body{background:var(--black);color:var(--text);font-family:var(--font-body);min-
 
 <script>
 netlifyIdentity.on("init", function(user) {
-  if (user) { showLoggedIn(user); } else { showLoggedOut(); }
+  var fromLogout = sessionStorage.getItem("from_logout"); sessionStorage.removeItem("from_logout");
+  if (user && !fromLogout) { showLoggedIn(user); setTimeout(function(){ window.location.href="app.html"; },500); } else { if(user) netlifyIdentity.logout(); showLoggedOut(); }
 });
 netlifyIdentity.on("login", function(user) {
   showLoggedIn(user);
