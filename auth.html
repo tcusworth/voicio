@@ -569,28 +569,9 @@ body{
 <script>
 // ═══════════════ POCKETBASE CONFIG ═══════════════
 const PB_URL = 'https://pb.voicio.app';
-let pb;
-window.pb = null; // expose globally v2
-
-function initPocketBase() {
-  try {
-    pb = new PocketBase(PB_URL);
-    window.pb = pb; // expose to console and global scope
-    if (pb.authStore.isValid) {
-      saveSession(pb.authStore.model);
-      window.location.href = 'index.html';
-    }
-  } catch(e) {
-    console.error('PocketBase init error:', e);
-  }
-}
-
-// Init immediately if PocketBase is available, otherwise wait
-window.addEventListener('load', () => {
-  if (typeof PocketBase !== 'undefined') {
-    initPocketBase();
-  }
-});
+// Initialize immediately — SDK loaded in head
+const pb = new PocketBase(PB_URL);
+window.pb = pb;
 
 // ═══════════════ STATE ═══════════════
 let currentSignupStep = 0;
@@ -820,6 +801,13 @@ function launchApp() { window.location.href = 'index.html'; }
 
 // ═══════════════ SESSION CHECK ═══════════════
 (function checkSession() {
+  // Check PocketBase auth store first
+  if (pb && pb.authStore.isValid) {
+    saveSession(pb.authStore.model);
+    window.location.href = 'index.html';
+    return;
+  }
+  // Fallback: check sessionStorage
   try {
     const s = JSON.parse(sessionStorage.getItem('voicio_session') || '{}');
     if (s.loggedIn) { window.location.href = 'index.html'; }
