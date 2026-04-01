@@ -253,6 +253,9 @@ select option{background:var(--surface2)}
     <button class="btn btn-primary btn-sm" onclick="navigate('generate')">
       <i data-lucide="sparkles" style="width:13px;height:13px"></i> New Post
     </button>
+    <button class="btn btn-secondary btn-sm" onclick="openUpgradeModal()" style="background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.15));border-color:rgba(59,130,246,0.3);color:var(--accent2)">
+      <i data-lucide="zap" style="width:13px;height:13px"></i> Upgrade
+    </button>
     <div style="display:flex;align-items:center;gap:6px;padding-left:10px;border-left:1px solid var(--border)">
       <div id="user-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c9a84c,#8b6914);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#050507;cursor:default;flex-shrink:0" title="Signed in"></div>
       <button class="btn btn-ghost btn-sm" onclick="logout()" title="Sign out" style="padding:6px 8px">
@@ -261,6 +264,46 @@ select option{background:var(--surface2)}
     </div>
   </div>
 </header>
+
+<!-- UPGRADE MODAL -->
+<div id="upgrade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:32px;width:560px;max-width:90vw">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:800">Upgrade Voicio</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeUpgradeModal()"><i data-lucide="x" style="width:14px;height:14px"></i></button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--accent2);letter-spacing:0.1em;margin-bottom:8px">CREATOR</div>
+        <div style="font-size:2rem;font-weight:800;margin-bottom:4px">9<span style="font-size:0.9rem;font-weight:400;color:var(--muted2)">/mo</span></div>
+        <div style="font-size:0.8rem;color:var(--muted2);margin-bottom:20px">For serious LinkedIn creators</div>
+        <ul style="list-style:none;margin-bottom:24px;display:flex;flex-direction:column;gap:8px">
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Unlimited AI posts</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> All 4 voice personas</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Post scheduler</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Google Sheets sync</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Algorithm audit</li>
+        </ul>
+        <button id="upgrade-btn-creator" class="btn btn-secondary btn-full" onclick="checkout('creator')">Upgrade to Creator</button>
+      </div>
+      <div style="background:var(--surface2);border:2px solid var(--accent);border-radius:var(--radius);padding:24px;position:relative">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent);color:white;font-size:0.65rem;font-weight:700;padding:3px 10px;border-radius:20px;font-family:var(--font-mono);letter-spacing:0.08em">MOST POPULAR</div>
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--accent2);letter-spacing:0.1em;margin-bottom:8px">STUDIO</div>
+        <div style="font-size:2rem;font-weight:800;margin-bottom:4px">9<span style="font-size:0.9rem;font-weight:400;color:var(--muted2)">/mo</span></div>
+        <div style="font-size:0.8rem;color:var(--muted2);margin-bottom:20px">For agencies and power users</div>
+        <ul style="list-style:none;margin-bottom:24px;display:flex;flex-direction:column;gap:8px">
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Everything in Creator</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Multiple brand voices</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Client management</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> Priority support</li>
+          <li style="font-size:0.82rem;color:var(--muted2);display:flex;gap:8px"><span style="color:var(--green)">✓</span> n8n webhook export</li>
+        </ul>
+        <button id="upgrade-btn-studio" class="btn btn-primary btn-full" onclick="checkout('studio')">Upgrade to Studio</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--muted2)">Cancel anytime · No contracts · Secure payment via Stripe</div>
+  </div>
+</div>
 
 <div class="main">
 <!-- SIDEBAR -->
@@ -2255,6 +2298,43 @@ function logout() {
   localStorage.removeItem('voicio_user');
   sessionStorage.removeItem('voicio_session');
   window.location.replace('/auth.html');
+}
+
+// ── STRIPE CHECKOUT ──
+async function checkout(plan) {
+  const user = window._voicioSession;
+  const btn = document.getElementById('upgrade-btn-' + plan);
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
+  try {
+    const res = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan, email: user?.email || '' })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Could not start checkout. Try again.', 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Upgrade'; }
+    }
+  } catch(e) {
+    showToast('Connection error. Try again.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Upgrade'; }
+  }
+}
+
+function openUpgradeModal() {
+  document.getElementById('upgrade-modal').style.display = 'flex';
+}
+function closeUpgradeModal() {
+  document.getElementById('upgrade-modal').style.display = 'none';
+}
+
+// Check if just upgraded
+if (new URLSearchParams(window.location.search).get('upgraded') === 'true') {
+  setTimeout(function() { showToast('🎉 Welcome to your new plan!', 'success'); }, 500);
+  history.replaceState({}, '', '/app.html');
 }
 document.addEventListener('DOMContentLoaded',initApp);
 </script>
