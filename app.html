@@ -253,11 +253,14 @@ select option{background:var(--surface2)}
     <button class="btn btn-primary btn-sm" onclick="navigate('generate')">
       <i data-lucide="sparkles" style="width:13px;height:13px"></i> New Post
     </button>
+    <div id="post-counter" style="display:none;font-family:var(--font-mono);font-size:0.68rem;color:var(--muted2);padding:5px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;white-space:nowrap">
+      <span id="post-counter-text">10 posts left</span>
+    </div>
     <button class="btn btn-secondary btn-sm" onclick="openUpgradeModal()" style="background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.15));border-color:rgba(59,130,246,0.3);color:var(--accent2)">
       <i data-lucide="zap" style="width:13px;height:13px"></i> Upgrade
     </button>
     <div style="display:flex;align-items:center;gap:6px;padding-left:10px;border-left:1px solid var(--border)">
-      <div id="user-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c9a84c,#8b6914);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#050507;cursor:default;flex-shrink:0" title="Signed in"></div>
+      <div id="user-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:white;cursor:default;flex-shrink:0" title="Signed in"></div>
       <button class="btn btn-ghost btn-sm" onclick="logout()" title="Sign out" style="padding:6px 8px">
         <i data-lucide="log-out" style="width:13px;height:13px"></i>
       </button>
@@ -1273,7 +1276,32 @@ function setPostType(type){
 // ── PLAN LIMITS ──
 const PLAN_LIMITS = { free: 10, creator: 999999, studio: 999999 };
 
-async function checkPostLimit() {
+async function loadPostCounter() {
+  const user = window._voicioSession;
+  if (!user || user.plan !== 'free') return;
+  try {
+    const token = localStorage.getItem('voicio_token');
+    const r = await fetch('https://pb.voicio.app/api/collections/users/records/' + user.id, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await r.json();
+    const used = data.post_count || 0;
+    const remaining = Math.max(0, 10 - used);
+    const counter = document.getElementById('post-counter');
+    const counterText = document.getElementById('post-counter-text');
+    if (counter && counterText) {
+      counter.style.display = 'block';
+      counterText.textContent = remaining + ' free posts left';
+      if (remaining <= 3) {
+        counter.style.borderColor = 'rgba(239,68,68,0.4)';
+        counter.style.color = '#fca5a5';
+      } else if (remaining <= 5) {
+        counter.style.borderColor = 'rgba(245,158,11,0.4)';
+        counter.style.color = '#fbbf24';
+      }
+    }
+  } catch(e) {}
+}
   const user = window._voicioSession;
   const plan = user?.plan || 'free';
   if (plan !== 'free') return true; // paid plans unlimited
@@ -1334,6 +1362,7 @@ async function generatePost(){
     document.getElementById('mini-score-ring').style.setProperty('--pct',score+'%');
     document.getElementById('mini-score-label').textContent=score>=80?'Strong post — ready to publish':score>=65?'Good — minor tweaks recommended':'Needs improvement';
     addToHistory({date:'Just now',format:currentPostType==='carousel'?'carousel':'post',tone:currentTone.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase()),preview:text.substring(0,120)+'...'});
+    loadPostCounter();
   }catch(e){output.textContent='Error connecting to AI. Please try again.';}
   btn.disabled=false;
   btn.innerHTML=currentPostType==='carousel'?'<i data-lucide="layout"></i> Generate Carousel':'<i data-lucide="sparkles"></i> Generate Post';
@@ -2315,6 +2344,8 @@ function initApp(){
     notificationsEnabled = true;
     scheduleNotifications();
   }
+
+  loadPostCounter();
 
   // Set user avatar initials from session
   const sess = window._voicioSession;
