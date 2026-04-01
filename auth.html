@@ -118,7 +118,7 @@ body{background:var(--black);color:var(--text);font-family:var(--font-body);min-
       <div class="user-avatar-big" id="user-initials">—</div>
       <div class="logged-in-name" id="user-display-name">—</div>
       <div class="logged-in-email" id="user-display-email">—</div>
-      <button class="btn-go" onclick="window.location.href='index.html'">Launch Voicio →</button>
+      <button class="btn-go" onclick="window.location.href='app.html'">Launch Voicio →</button>
       <button class="btn-logout" onclick="netlifyIdentity.logout()">Sign out</button>
     </div>
 
@@ -132,7 +132,7 @@ netlifyIdentity.on("init", function(user) {
 netlifyIdentity.on("login", function(user) {
   showLoggedIn(user);
   netlifyIdentity.close();
-  setTimeout(function() { window.location.href = "index.html"; }, 800);
+  setTimeout(function() { window.location.href = "app.html"; }, 800);
 });
 netlifyIdentity.on("logout", function() { showLoggedOut(); });
 
