@@ -174,7 +174,7 @@ netlifyIdentity.on('login', function(user) {
     loggedIn: true
   }));
   netlifyIdentity.close();
-  window.location.href = '/app';
+  window.location.href = '/app.html';
 });
 
 // ── CHECK IF ALREADY LOGGED IN ──
@@ -185,7 +185,7 @@ sessionStorage.removeItem('just_logged_out');
 if (session && !justLoggedOut) {
   try {
     var s = JSON.parse(session);
-    if (s.loggedIn) window.location.href = '/app';
+    if (s.loggedIn) window.location.href = '/app.html';
   } catch(e) {}
 }
 </script>
