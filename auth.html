@@ -570,11 +570,12 @@ body{
 // ═══════════════ POCKETBASE CONFIG ═══════════════
 const PB_URL = 'https://pb.voicio.app';
 let pb;
+window.pb = null; // expose globally
 
-// Initialize PocketBase — SDK already loaded via script tag in head
 function initPocketBase() {
   try {
     pb = new PocketBase(PB_URL);
+    window.pb = pb; // expose to console and global scope
     if (pb.authStore.isValid) {
       saveSession(pb.authStore.model);
       window.location.href = 'index.html';
