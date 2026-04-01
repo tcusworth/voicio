@@ -8,8 +8,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "stripe": "^21.0.1"
-  }
+  },
+  "description": ""
 }
