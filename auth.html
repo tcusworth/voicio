@@ -7,19 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script>
-// Force clear session if coming from logout BEFORE identity widget loads
-if (sessionStorage.getItem("from_logout")) {
-  sessionStorage.removeItem("from_logout");
-  // Clear all Netlify Identity localStorage keys
-  Object.keys(localStorage).forEach(function(k) {
-    if (k.indexOf("gotrue") > -1 || k.indexOf("netlify") > -1) {
-      localStorage.removeItem(k);
-    }
-  });
-}
-</script>
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"><\/script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
@@ -113,12 +101,12 @@ body{background:var(--black);color:var(--text);font-family:var(--font-body);min-
     <div id="auth-gate">
       <div class="welcome-title">Welcome to Voicio</div>
       <div class="welcome-sub">Sign in or create a free account to get started</div>
-      <button class="btn-launch" onclick="netlifyIdentity.open('login')">
+      <button class="btn-launch" id="btn-signin">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         Sign in
       </button>
       <div class="or-divider">new to voicio</div>
-      <button class="btn-signup" onclick="netlifyIdentity.open('signup')">Create a free account →</button>
+      <button class="btn-signup" id="btn-signup">Create a free account →</button>
       <div class="trust-row">
         <span class="trust-item">✓ Free forever plan</span>
         <span class="trust-item">✓ No credit card</span>
@@ -138,52 +126,67 @@ body{background:var(--black);color:var(--text);font-family:var(--font-body);min-
 </div>
 
 <script>
-// On load - if from logout, clear everything
-var fromLogout = sessionStorage.getItem('from_logout');
-sessionStorage.removeItem('from_logout');
-sessionStorage.removeItem('voicio_session');
-if (fromLogout) {
-  Object.keys(localStorage).forEach(function(k) {
-    if (k.indexOf('gotrue') > -1 || k.indexOf('netlify') > -1) localStorage.removeItem(k);
+var PB_URL = 'https://pb.voicio.app';
+
+// ── Simple PocketBase auth — no widget, no auto-session ──
+function pbFetch(path, method, body) {
+  return fetch(PB_URL + path, {
+    method: method || 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(function(r) {
+    return r.json().then(function(d) {
+      if (!r.ok) throw new Error(d.message || 'Request failed');
+      return d;
+    });
   });
 }
 
-netlifyIdentity.on('init', function(user) {
-  if (user && !fromLogout) {
-    showLoggedIn(user);
-    setTimeout(function(){ window.location.href = 'app.html'; }, 600);
-  } else {
-    showLoggedOut();
-  }
-});
-
-netlifyIdentity.on('login', function(user) {
-  showLoggedIn(user);
-  netlifyIdentity.close();
-  setTimeout(function() { window.location.href = 'app.html'; }, 600);
-});
-
-netlifyIdentity.on('logout', function() { showLoggedOut(); });
-
-function showLoggedIn(user) {
-  document.getElementById('auth-gate').style.display = 'none';
-  document.getElementById('logged-in-state').style.display = 'block';
-  var name = (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
-  var initials = name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
-  document.getElementById('user-initials').textContent = initials;
-  document.getElementById('user-display-name').textContent = name;
-  document.getElementById('user-display-email').textContent = user.email;
+function saveSession(data) {
   sessionStorage.setItem('voicio_session', JSON.stringify({
-    id: user.id, email: user.email, name: name,
-    token: user.token ? user.token.access_token : '',
-    plan: 'free', loggedIn: true
+    id: data.record.id,
+    email: data.record.email,
+    name: data.record.firstName || data.record.email.split('@')[0],
+    token: data.token,
+    plan: data.record.plan || 'free',
+    loggedIn: true
   }));
 }
 
-function showLoggedOut() {
-  document.getElementById('auth-gate').style.display = 'block';
-  document.getElementById('logged-in-state').style.display = 'none';
-  sessionStorage.removeItem('voicio_session');
+// ── LOGIN ──
+document.getElementById('btn-signin').onclick = function() {
+  netlifyIdentity.open('login');
+};
+
+// ── SIGNUP ──
+document.getElementById('btn-signup').onclick = function() {
+  netlifyIdentity.open('signup');
+};
+
+// ── NETLIFY IDENTITY (keep for OAuth only) ──
+netlifyIdentity.on('login', function(user) {
+  sessionStorage.setItem('voicio_session', JSON.stringify({
+    id: user.id,
+    email: user.email,
+    name: (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0],
+    token: user.token ? user.token.access_token : '',
+    plan: 'free',
+    loggedIn: true
+  }));
+  netlifyIdentity.close();
+  window.location.href = '/app';
+});
+
+// ── CHECK IF ALREADY LOGGED IN ──
+// Only redirect if we have a valid session AND did not just log out
+var session = sessionStorage.getItem('voicio_session');
+var justLoggedOut = sessionStorage.getItem('just_logged_out');
+sessionStorage.removeItem('just_logged_out');
+if (session && !justLoggedOut) {
+  try {
+    var s = JSON.parse(session);
+    if (s.loggedIn) window.location.href = '/app';
+  } catch(e) {}
 }
 </script>
 </body>
