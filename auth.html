@@ -585,11 +585,11 @@ function initPocketBase() {
 }
 
 // Init immediately if PocketBase is available, otherwise wait
-if (typeof PocketBase !== 'undefined') {
-  initPocketBase();
-} else {
-  document.addEventListener('DOMContentLoaded', initPocketBase);
-}
+window.addEventListener('load', () => {
+  if (typeof PocketBase !== 'undefined') {
+    initPocketBase();
+  }
+});
 
 // ═══════════════ STATE ═══════════════
 let currentSignupStep = 0;
