@@ -1429,6 +1429,8 @@ async function loadPostCounter() {
     }
   } catch(e) {}
 }
+
+async function checkPostLimit() {
   const user = window._voicioSession;
   const plan = user?.plan || 'free';
   if (plan !== 'free') return true; // paid plans unlimited
