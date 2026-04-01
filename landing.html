@@ -89,7 +89,6 @@ nav.scrolled {
   padding: 16px 60px;
 }
 /* All sections capped at 1440px and centered */
-section { max-width: 1440px; margin: 0 auto; width: 100%; }
 .marquee-strip { max-width: 100% !important; }
 .cta-section { max-width: 1440px; margin: 0 auto; }
 .nav-logo {
@@ -320,7 +319,7 @@ section { max-width: 1440px; margin: 0 auto; width: 100%; }
 }
 
 /* ===================== SECTION SHARED ===================== */
-section { padding: 120px 60px; position: relative; }
+section { padding: 120px 60px; position: relative; max-width: 1440px; margin: 0 auto; width: 100%; }
 .section-eyebrow {
   font-family: var(--font-mono); font-size: 0.68rem;
   font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
@@ -796,10 +795,10 @@ footer {
 </nav>
 
 <!-- HERO -->
-<section class="hero" style="display:flex;flex-direction:row;align-items:center;justify-content:flex-start;min-height:100vh;padding:140px 60px 80px;position:relative;overflow:hidden;gap:80px;box-sizing:border-box">
+<section class="hero" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:100vh;padding:140px 60px 80px;position:relative;overflow:hidden;gap:40px;box-sizing:border-box">
 
   <!-- LEFT: content -->
-  <div style="flex:0 0 620px;max-width:620px;position:relative;z-index:1">
+  <div style="flex:1;min-width:0;max-width:680px;position:relative;z-index:1">
     <div class="hero-eyebrow">LinkedIn Content Operating System</div>
 
     <h1 class="hero-headline">
@@ -830,7 +829,7 @@ footer {
   </div>
 
   <!-- RIGHT: stats -->
-  <div class="hero-stats" style="flex-shrink:0;width:260px;position:relative;z-index:1">
+  <div class="hero-stats" style="flex-shrink:0;width:220px;position:relative;z-index:1">
     <div class="hero-stat">
       <div class="hero-stat-num">9<span>+</span></div>
       <div class="hero-stat-label">AI Power Tools</div>
