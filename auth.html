@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"><\/script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
@@ -18,8 +18,8 @@ html{font-size:16px}
   --text:#eeeef2; --text2:#9898a8; --text3:#5c5c70;
   --font-display:"Fraunces",serif; --font-body:"DM Sans",sans-serif; --font-mono:"DM Mono",monospace;
 }
-body{background:var(--black);color:var(--text);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;display:flex;overflow:hidden}
-.auth-left{width:52%;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:40px 56px;position:relative;overflow:hidden}
+body{background:var(--black);color:var(--text);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased;display:flex;overflow:hidden;max-width:100vw}
+.auth-left{width:45%;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:40px 56px;position:relative;overflow:hidden}
 .auth-left::before{content:"";position:absolute;top:-30%;right:-20%;width:70%;height:70%;background:radial-gradient(ellipse,rgba(201,168,76,0.08) 0%,transparent 65%);pointer-events:none}
 .auth-left::after{content:"";position:absolute;bottom:-20%;left:-10%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(59,107,255,0.05) 0%,transparent 65%);pointer-events:none}
 .auth-left-inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:space-between}
@@ -37,7 +37,7 @@ body{background:var(--black);color:var(--text);font-family:var(--font-body);min-
 .author-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8b6914);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--black)}
 .author-name{font-size:0.82rem;font-weight:600}
 .author-role{font-size:0.72rem;color:var(--text3)}
-.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 56px;min-height:100vh}
+.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 56px;min-height:100vh;background:var(--dark)}
 .auth-form-wrap{width:100%;max-width:400px}
 .welcome-title{font-family:var(--font-display);font-size:2rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:8px;line-height:1.1}
 .welcome-sub{font-size:0.875rem;color:var(--text2);margin-bottom:32px}
@@ -118,7 +118,7 @@ body{background:var(--black);color:var(--text);font-family:var(--font-body);min-
       <div class="user-avatar-big" id="user-initials">—</div>
       <div class="logged-in-name" id="user-display-name">—</div>
       <div class="logged-in-email" id="user-display-email">—</div>
-      <button class="btn-go" onclick="window.location.href='app.html'">Launch Voicio →</button>
+      <button class="btn-go" onclick="window.location.href='index.html'">Launch Voicio →</button>
       <button class="btn-logout" onclick="netlifyIdentity.logout()">Sign out</button>
     </div>
 
@@ -132,7 +132,7 @@ netlifyIdentity.on("init", function(user) {
 netlifyIdentity.on("login", function(user) {
   showLoggedIn(user);
   netlifyIdentity.close();
-  setTimeout(function() { window.location.href = "app.html"; }, 800);
+  setTimeout(function() { window.location.href = "index.html"; }, 800);
 });
 netlifyIdentity.on("logout", function() { showLoggedOut(); });
 
